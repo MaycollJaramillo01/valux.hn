@@ -27,6 +27,10 @@
         document.querySelectorAll('a[href]').forEach(link => {
             const href = link.getAttribute('href');
             if (!href || href.startsWith('#') || href.includes(':')) return;
+            if (href === '/') {
+                link.setAttribute('href', 'index.html');
+                return;
+            }
             const match = href.match(/^\/?([^?#/]+)(.*)$/);
             if (!match || !localRoutes[match[1]]) return;
             link.setAttribute('href', localRoutes[match[1]] + (match[2] || ''));
