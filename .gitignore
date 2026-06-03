@@ -1,0 +1,12 @@
+.codex-screenshots/
+node_modules/
+test-results/
+.env
+.DS_Store
+Thumbs.db
+PROMPT-*.md
+
+# Keep web-ready videos in the repo; keep 4K originals local.
+Assets/Videos/*.mp4
+!Assets/Videos/web/
+!Assets/Videos/web/*.mp4
