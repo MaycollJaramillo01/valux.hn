@@ -1,12 +1,16 @@
 .codex-screenshots/
 node_modules/
 test-results/
+.next/
+.vercel/
 .env
+.env*.local
+next-env.d.ts
 .DS_Store
 Thumbs.db
 PROMPT-*.md
 
 # Keep web-ready videos in the repo; keep 4K originals local.
-Assets/Videos/*.mp4
-!Assets/Videos/web/
-!Assets/Videos/web/*.mp4
+public/Assets/Videos/*.mp4
+!public/Assets/Videos/web/
+!public/Assets/Videos/web/*.mp4
