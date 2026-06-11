@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import { randomBytes } from 'crypto';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { emailVerificationEnabled, sendVerificationEmail } from '@/lib/email';
 
 const registerSchema = z.object({
   name: z.string().trim().min(2, 'El nombre es muy corto'),
@@ -36,7 +38,36 @@ export async function POST(request: Request) {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
-  await prisma.user.create({ data: { name, email, passwordHash } });
+  const requiresVerification = emailVerificationEnabled();
 
-  return NextResponse.json({ ok: true }, { status: 201 });
+  await prisma.user.create({
+    data: {
+      name,
+      email,
+      passwordHash,
+      // Sin Resend configurado la cuenta queda activa de inmediato.
+      emailVerified: requiresVerification ? null : new Date(),
+    },
+  });
+
+  if (requiresVerification) {
+    const token = randomBytes(32).toString('hex');
+    await prisma.verificationToken.create({
+      data: { token, email, expires: new Date(Date.now() + 24 * 60 * 60 * 1000) },
+    });
+    try {
+      await sendVerificationEmail(email, name, token);
+    } catch (err) {
+      console.error('No se pudo enviar el correo de verificación:', err);
+      // Si el correo falla, activamos la cuenta para no dejarla inutilizable.
+      await prisma.user.update({ where: { email }, data: { emailVerified: new Date() } });
+      await prisma.verificationToken.deleteMany({ where: { email } });
+      return NextResponse.json({ ok: true, verificationRequired: false }, { status: 201 });
+    }
+  }
+
+  return NextResponse.json(
+    { ok: true, verificationRequired: requiresVerification },
+    { status: 201 }
+  );
 }

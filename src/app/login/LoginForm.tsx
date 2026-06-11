@@ -24,15 +24,25 @@ export default function LoginForm() {
 
     setLoading(false);
     if (result?.error) {
-      setError('Email o contraseña incorrectos.');
+      setError('Credenciales incorrectas o cuenta sin confirmar. Revisá tu correo si acabás de registrarte.');
       return;
     }
     router.push(searchParams.get('callbackUrl') ?? '/cursos');
     router.refresh();
   }
 
+  const verificacion = searchParams.get('verificacion');
+
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
+      {verificacion === 'ok' && !error && (
+        <p className="auth-error" style={{ color: 'var(--royal)', borderColor: 'var(--royal)', background: 'rgba(30,80,160,.08)' }}>
+          Cuenta confirmada. Ya podés iniciar sesión.
+        </p>
+      )}
+      {verificacion === 'invalida' && !error && (
+        <p className="auth-error">El enlace de verificación es inválido o venció.</p>
+      )}
       <div className="auth-field">
         <label htmlFor="email">Email</label>
         <input id="email" name="email" type="email" required autoComplete="email" placeholder="tu@email.com" />

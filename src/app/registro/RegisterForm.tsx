@@ -8,6 +8,7 @@ export default function RegisterForm() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,10 +32,35 @@ export default function RegisterForm() {
       return;
     }
 
-    // Cuenta creada: iniciar sesión automáticamente.
+    const data = await res.json().catch(() => null);
+    if (data?.verificationRequired) {
+      // Hay que confirmar el correo antes de poder entrar.
+      setLoading(false);
+      setPendingEmail(String(email));
+      return;
+    }
+
+    // Cuenta activa de inmediato: iniciar sesión automáticamente.
     await signIn('credentials', { email, password, redirect: false });
     router.push('/cursos');
     router.refresh();
+  }
+
+  if (pendingEmail) {
+    return (
+      <div className="auth-form">
+        <p className="auth-lead" style={{ margin: 0 }}>
+          <span data-es="Te enviamos un correo a " data-en="We sent an email to ">Te enviamos un correo a </span>
+          <strong>{pendingEmail}</strong>
+          <span
+            data-es=". Abrí el enlace para confirmar tu cuenta y después iniciá sesión."
+            data-en=". Open the link to confirm your account, then sign in."
+          >
+            . Abrí el enlace para confirmar tu cuenta y después iniciá sesión.
+          </span>
+        </p>
+      </div>
+    );
   }
 
   return (
