@@ -9,18 +9,29 @@ datasource db {
 
 enum Role {
   USER
+  TEACHER
   ADMIN
 }
 
+enum ResourceType {
+  VIDEO
+  PDF
+  IMAGE
+  LINK
+  TEXT
+}
+
 model User {
-  id            String       @id @default(cuid())
-  name          String
-  email         String       @unique
-  passwordHash  String
-  role          Role         @default(USER)
-  emailVerified DateTime?
-  createdAt     DateTime     @default(now())
-  enrollments   Enrollment[]
+  id             String           @id @default(cuid())
+  name           String
+  email          String           @unique
+  passwordHash   String
+  role           Role             @default(USER)
+  emailVerified  DateTime?
+  createdAt      DateTime         @default(now())
+  enrollments    Enrollment[]
+  coursesTaught  Course[]         @relation("CourseTeacher")
+  lessonProgress LessonProgress[]
 }
 
 model VerificationToken {
@@ -35,31 +46,75 @@ model Course {
   title       String
   description String
   published   Boolean      @default(false)
+  teacherId   String?
   createdAt   DateTime     @default(now())
+  teacher     User?        @relation("CourseTeacher", fields: [teacherId], references: [id])
+  sections    Section[]
   lessons     Lesson[]
   enrollments Enrollment[]
 }
 
-model Lesson {
-  id       String  @id @default(cuid())
+model Section {
+  id       String   @id @default(cuid())
   courseId String
-  slug     String
   title    String
-  content  String
-  videoUrl String?
-  order    Int     @default(0)
-  course   Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  order    Int      @default(0)
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons  Lesson[]
+}
+
+model Lesson {
+  id        String           @id @default(cuid())
+  courseId  String
+  sectionId String?
+  slug      String
+  title     String
+  content   String
+  videoUrl  String?
+  points    Int              @default(10)
+  duration  Int? // minutos estimados
+  order     Int              @default(0)
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  section   Section?         @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  resources Resource[]
+  progress  LessonProgress[]
 
   @@unique([courseId, slug])
 }
 
+model Resource {
+  id       String       @id @default(cuid())
+  lessonId String
+  type     ResourceType
+  title    String
+  url      String? // VIDEO / PDF / IMAGE / LINK
+  content  String? // TEXT
+  order    Int          @default(0)
+  lesson   Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  lessonId    String
+  completedAt DateTime  @default(now())
+  score       Int? // nota del profesor (0-100), null = sin calificar
+  gradedAt    DateTime?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
 model Enrollment {
-  id        String   @id @default(cuid())
-  userId    String
-  courseId  String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  finalGrade Int? // nota final del curso (0-100), asignada por el profesor
+  notes      String? // observaciones del profesor
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
 }

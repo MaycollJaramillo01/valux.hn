@@ -1,0 +1,423 @@
+/* VALUX — plataforma de cursos (detalle, lección, panel docente)
+   Sistema editorial: tinta, papel, royal, mono. */
+
+/* ---------- comunes ---------- */
+.course-shell {
+    padding: 3rem 1.25rem 5rem;
+    background: var(--paper);
+}
+
+.course-shell .container-narrow {
+    max-width: var(--container-narrow);
+    margin: 0 auto;
+}
+
+.course-eyebrow {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--royal);
+    margin: 0 0 .6rem;
+}
+
+.course-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: .95;
+    text-transform: uppercase;
+    margin: 0 0 .8rem;
+}
+
+.course-lead {
+    color: var(--muted);
+    max-width: 60ch;
+    margin: 0 0 1.6rem;
+}
+
+/* ---------- barra de progreso ---------- */
+.progress-bar {
+    height: 10px;
+    background: var(--white);
+    border: 1px solid var(--ink);
+    margin: .4rem 0 .3rem;
+}
+
+.progress-bar > span {
+    display: block;
+    height: 100%;
+    background: var(--royal);
+    transition: width .4s var(--ease);
+}
+
+.progress-label {
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* ---------- secciones / temario ---------- */
+.syllabus {
+    margin-top: 2.4rem;
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+}
+
+.syllabus-section + .syllabus-section {
+    border-top: 1px solid var(--ink);
+}
+
+.syllabus-section > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.3rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.syllabus-section > summary::-webkit-details-marker {
+    display: none;
+}
+
+.syllabus-section > summary .syllabus-meta {
+    font-family: var(--font-mono);
+    font-size: .66rem;
+    font-weight: 500;
+    letter-spacing: .1em;
+    color: rgba(245, 241, 234, .7);
+    white-space: nowrap;
+}
+
+.lesson-row {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    padding: .85rem 1.3rem;
+    border-top: 1px solid var(--line);
+    color: var(--ink);
+    transition: background .18s var(--ease);
+}
+
+a.lesson-row:hover {
+    background: rgba(30, 80, 160, .07);
+}
+
+.lesson-row.is-locked {
+    color: var(--muted);
+}
+
+.lesson-check {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    border: 1.5px solid var(--ink);
+    background: var(--white);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    line-height: 1;
+}
+
+.lesson-row.is-done .lesson-check {
+    background: var(--royal);
+    border-color: var(--royal);
+    color: #fff;
+}
+
+.lesson-row .lesson-name {
+    flex: 1;
+    font-size: .95rem;
+}
+
+.lesson-row .lesson-tags {
+    display: flex;
+    gap: .8rem;
+    font-family: var(--font-mono);
+    font-size: .64rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.lesson-row .lesson-tags .pts {
+    color: var(--royal);
+    font-weight: 600;
+}
+
+/* ---------- página de lección (player) ---------- */
+.player-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 1.5rem;
+    max-width: var(--container);
+    margin: 0 auto;
+    align-items: start;
+}
+
+.player-main {
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+}
+
+.player-head {
+    padding: .7rem 1.2rem;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.player-head a {
+    color: var(--royal-electric);
+}
+
+.player-body {
+    padding: 1.6rem 1.4rem 2rem;
+}
+
+.player-body h1 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    text-transform: uppercase;
+    line-height: .95;
+    margin: 0 0 1.2rem;
+}
+
+.resource-block {
+    margin: 0 0 1.6rem;
+    border: 1px solid var(--line);
+    background: var(--white);
+}
+
+.resource-block-head {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .55rem .9rem;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.resource-block-head .resource-kind {
+    color: #fff;
+    background: var(--royal);
+    padding: .15rem .5rem;
+}
+
+.resource-block video,
+.resource-block img {
+    width: 100%;
+    display: block;
+}
+
+.resource-block iframe {
+    width: 100%;
+    height: 540px;
+    border: 0;
+    display: block;
+}
+
+.resource-block .resource-text {
+    padding: 1rem 1.2rem;
+    white-space: pre-wrap;
+    line-height: 1.7;
+}
+
+.resource-block .resource-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: .9rem 1.2rem;
+    font-family: var(--font-mono);
+    font-size: .8rem;
+    color: var(--royal);
+}
+
+.player-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--line);
+}
+
+.lesson-done-badge {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--royal);
+    border: 1px solid var(--royal);
+    padding: .5rem .9rem;
+    background: rgba(30, 80, 160, .07);
+}
+
+/* ---------- sidebar contenido del curso ---------- */
+.player-side {
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    position: sticky;
+    top: calc(var(--header-h) + 1rem);
+    max-height: calc(100vh - var(--header-h) - 2rem);
+    overflow: auto;
+}
+
+.player-side-head {
+    padding: .7rem 1rem;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+}
+
+.player-side .side-section {
+    padding: .6rem 1rem .3rem;
+    font-family: var(--font-display);
+    font-size: .85rem;
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.player-side .lesson-row {
+    padding: .6rem 1rem;
+}
+
+.player-side .lesson-row.is-current {
+    background: rgba(30, 80, 160, .12);
+    border-left: 3px solid var(--royal);
+}
+
+/* ---------- panel docente ---------- */
+.panel-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    font-size: .92rem;
+}
+
+.panel-table th {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: .7rem .9rem;
+}
+
+.panel-table td {
+    padding: .7rem .9rem;
+    border-top: 1px solid var(--line);
+    vertical-align: middle;
+}
+
+.panel-table tr:hover td {
+    background: rgba(30, 80, 160, .05);
+}
+
+.panel-table input[type="number"],
+.panel-table input[type="text"] {
+    width: 80px;
+    min-height: 38px;
+    padding: .3rem .5rem;
+    font-family: var(--font-mono);
+    font-size: .85rem;
+    border: 1px solid var(--line);
+    border-radius: 0;
+    background: var(--white);
+}
+
+.panel-table input[type="text"] {
+    width: 100%;
+}
+
+.panel-table input:focus {
+    outline: none;
+    border-color: var(--royal);
+}
+
+.grade-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .2rem .55rem;
+    border: 1px solid var(--ink);
+}
+
+.grade-chip.is-pass {
+    color: var(--royal);
+    border-color: var(--royal);
+}
+
+.grade-chip.is-fail {
+    color: var(--terracotta);
+    border-color: var(--terracotta);
+}
+
+.panel-card {
+    border: 1px solid var(--ink);
+    background: var(--paper-2);
+    padding: 1.4rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-table {
+    min-height: 38px;
+    padding: .4rem .8rem;
+    font-size: .7rem;
+}
+
+@media (max-width: 960px) {
+    .player-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .player-side {
+        position: static;
+        max-height: none;
+    }
+
+    .resource-block iframe {
+        height: 420px;
+    }
+}

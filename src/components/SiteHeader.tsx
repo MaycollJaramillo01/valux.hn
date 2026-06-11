@@ -28,6 +28,11 @@ export default async function SiteHeader() {
               <button type="button" data-lang="es">ES</button>
               <button type="button" data-lang="en">EN</button>
             </div>
+            {session?.user && ['TEACHER', 'ADMIN'].includes((session.user as { role?: string }).role ?? '') && (
+              <a href="/panel" className="btn btn-ghost btn-sm" data-es="Panel" data-en="Panel">
+                Panel
+              </a>
+            )}
             {session?.user ? (
               <form
                 action={async () => {

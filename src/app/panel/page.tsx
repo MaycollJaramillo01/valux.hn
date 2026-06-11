@@ -1,0 +1,76 @@
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
+
+export const metadata = { title: 'Panel docente - VALUX' };
+export const dynamic = 'force-dynamic';
+
+export default async function PanelPage() {
+  const session = await auth();
+  if (!session?.user) redirect('/login?callbackUrl=/panel');
+  const role = (session.user as { role?: string }).role;
+  if (role !== 'TEACHER' && role !== 'ADMIN') redirect('/cursos');
+
+  const courses = await prisma.course.findMany({
+    // Los ADMIN ven todos los cursos; los profesores solo los suyos.
+    where: role === 'ADMIN' ? {} : { teacherId: session.user.id },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      teacher: { select: { name: true } },
+      _count: { select: { enrollments: true, lessons: true } },
+    },
+  });
+
+  return (
+    <>
+      <SiteHeader />
+      <main id="main">
+        <section className="course-shell">
+          <div className="container-narrow">
+            <p className="course-eyebrow">VX / <span data-es="Panel docente" data-en="Teacher panel">Panel docente</span></p>
+            <h1 className="course-title" data-es="Mis cursos" data-en="My courses">Mis cursos</h1>
+            <p className="course-lead" data-es="Gestioná alumnos, progreso y calificaciones." data-en="Manage students, progress and grades.">
+              Gestioná alumnos, progreso y calificaciones.
+            </p>
+
+            {courses.length === 0 ? (
+              <p data-es="No tenés cursos asignados todavía." data-en="No courses assigned to you yet.">
+                No tenés cursos asignados todavía.
+              </p>
+            ) : (
+              <table className="panel-table">
+                <thead>
+                  <tr>
+                    <th data-es="Curso" data-en="Course">Curso</th>
+                    <th data-es="Profesor" data-en="Teacher">Profesor</th>
+                    <th data-es="Lecciones" data-en="Lessons">Lecciones</th>
+                    <th data-es="Alumnos" data-en="Students">Alumnos</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {courses.map((c) => (
+                    <tr key={c.id}>
+                      <td><strong>{c.title}</strong></td>
+                      <td>{c.teacher?.name ?? '—'}</td>
+                      <td>{c._count.lessons}</td>
+                      <td>{c._count.enrollments}</td>
+                      <td>
+                        <a href={`/panel/${c.slug}`} className="btn btn-primary btn-table">
+                          <span data-es="Gestionar" data-en="Manage">Gestionar</span>
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
