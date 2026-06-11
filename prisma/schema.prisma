@@ -45,6 +45,7 @@ model Course {
   slug        String       @unique
   title       String
   description String
+  coverUrl    String? // imagen de portada; sin ella se genera carátula editorial
   published   Boolean      @default(false)
   teacherId   String?
   createdAt   DateTime     @default(now())

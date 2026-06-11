@@ -6,12 +6,18 @@ import SiteFooter from '@/components/SiteFooter';
 export const metadata = { title: 'Cursos - VALUX' };
 export const dynamic = 'force-dynamic';
 
+// Variantes de carátula editorial cuando el curso no tiene imagen propia.
+const coverVariants = ['cover-v-royal', 'cover-v-ink', 'cover-v-clay', 'cover-v-paper'];
+
 export default async function CoursesPage() {
   const session = await auth();
   const courses = await prisma.course.findMany({
     where: { published: true },
     orderBy: { createdAt: 'desc' },
-    include: { _count: { select: { lessons: true } } },
+    include: {
+      teacher: { select: { name: true } },
+      _count: { select: { lessons: true, enrollments: true } },
+    },
   });
 
   return (
@@ -37,23 +43,38 @@ export default async function CoursesPage() {
                 Pronto publicaremos los primeros cursos.
               </p>
             ) : (
-              <div className="contact-grid">
-                {courses.map((course) => (
-                  <div key={course.id} className="contact-tile">
-                    <h4>{course.title}</h4>
-                    <p style={{ marginBottom: '.4rem', color: 'var(--grey-700)' }}>{course.description}</p>
-                    <p style={{ marginBottom: '.4rem', fontSize: '.85rem', color: 'var(--grey-700)' }}>
-                      {course._count.lessons}{' '}
-                      <span data-es="lecciones" data-en="lessons">lecciones</span>
-                    </p>
-                    <a href={`/cursos/${course.slug}`} data-es="Ver curso" data-en="View course">Ver curso</a>
-                  </div>
+              <div className="course-grid">
+                {courses.map((course, i) => (
+                  <a key={course.id} href={`/cursos/${course.slug}`} className="course-card">
+                    {course.coverUrl ? (
+                      <div className="course-card-cover has-image">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={course.coverUrl} alt={course.title} />
+                      </div>
+                    ) : (
+                      <div className={`course-card-cover ${coverVariants[i % coverVariants.length]}`}>
+                        <span className="cover-index">VX / {String(i + 1).padStart(2, '0')}</span>
+                        <span className="cover-word">{course.title}</span>
+                      </div>
+                    )}
+                    <div className="course-card-body">
+                      <h3>{course.title}</h3>
+                      <p>{course.description}</p>
+                      <div className="course-card-meta">
+                        <span>
+                          {course._count.lessons}{' '}
+                          <span data-es="lecciones" data-en="lessons">lecciones</span>
+                        </span>
+                        <span>{course.teacher?.name ?? 'VALUX'}</span>
+                      </div>
+                    </div>
+                  </a>
                 ))}
               </div>
             )}
 
             {!session?.user && (
-              <p style={{ textAlign: 'center', marginTop: '2rem' }}>
+              <p style={{ textAlign: 'center', marginTop: '2.4rem' }}>
                 <a href="/registro" className="btn btn-primary">
                   <span data-es="Crear cuenta para inscribirme" data-en="Create an account to enroll">
                     Crear cuenta para inscribirme

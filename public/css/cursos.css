@@ -421,3 +421,103 @@ a.lesson-row:hover {
         height: 420px;
     }
 }
+
+/* ---------- catálogo de cursos con portada ---------- */
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+    margin-top: 2.4rem;
+}
+
+.course-card {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid var(--ink);
+    background: var(--paper-2);
+    color: var(--ink);
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease);
+}
+
+a.course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 0 rgba(5, 5, 5, .9);
+}
+
+.course-card-cover {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+    padding: 1rem;
+    border-bottom: 2px solid var(--ink);
+    overflow: hidden;
+}
+
+.course-card-cover.has-image {
+    padding: 0;
+}
+
+.course-card-cover.has-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.course-card-cover .cover-index {
+    font-family: var(--font-mono);
+    font-size: .66rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    opacity: .75;
+}
+
+.course-card-cover .cover-word {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 2.6rem;
+    line-height: .82;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.cover-v-royal { background: var(--royal); color: var(--paper); }
+.cover-v-ink   { background: var(--ink); color: var(--paper); }
+.cover-v-clay  { background: var(--clay); color: var(--paper); }
+.cover-v-paper { background: var(--paper-2); color: var(--ink); }
+
+.course-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    flex: 1;
+    padding: 1rem 1.1rem 1.2rem;
+}
+
+.course-card-body h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+
+.course-card-body p {
+    margin: 0;
+    flex: 1;
+    font-size: .9rem;
+    color: var(--muted);
+}
+
+.course-card-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: var(--font-mono);
+    font-size: .66rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--royal);
+}
