@@ -14,3 +14,5 @@ PROMPT-*.md
 public/Assets/Videos/*.mp4
 !public/Assets/Videos/web/
 !public/Assets/Videos/web/*.mp4
+.vercel
+.env*
