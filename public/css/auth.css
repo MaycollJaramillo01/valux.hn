@@ -1,0 +1,179 @@
+/* VALUX — panel de autenticación (login / registro)
+   Sigue el sistema editorial de styles.css: tinta, papel, royal, mono. */
+
+.auth-section {
+    min-height: calc(100vh - var(--header-h));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.25rem 5rem;
+    background:
+        linear-gradient(rgba(5, 5, 5, .035) 1px, transparent 1px) 0 0 / 100% 56px,
+        var(--paper);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--paper-2);
+    border: 1px solid var(--ink);
+    box-shadow: 10px 10px 0 rgba(5, 5, 5, .9);
+}
+
+.auth-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem 1.4rem;
+    border-bottom: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.auth-card-head .auth-index {
+    color: var(--royal-electric);
+}
+
+.auth-card-body {
+    padding: 2.2rem 1.6rem 2rem;
+}
+
+.auth-title {
+    margin: 0 0 .4rem;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2.2rem, 6vw, 2.9rem);
+    line-height: .95;
+    letter-spacing: .01em;
+    text-transform: uppercase;
+}
+
+.auth-lead {
+    margin: 0 0 2rem;
+    font-size: .95rem;
+    color: var(--muted);
+}
+
+.auth-form {
+    display: grid;
+    gap: 1.3rem;
+}
+
+.auth-field {
+    display: grid;
+    gap: .45rem;
+}
+
+.auth-field label {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink);
+}
+
+.auth-field input {
+    width: 100%;
+    min-height: 48px;
+    padding: .6rem .85rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 0;
+    outline: none;
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+
+.auth-field input:focus {
+    border-color: var(--royal);
+    box-shadow: 4px 4px 0 rgba(30, 80, 160, .25);
+}
+
+.auth-field .auth-hint {
+    font-family: var(--font-mono);
+    font-size: .66rem;
+    letter-spacing: .06em;
+    color: var(--muted);
+}
+
+.auth-error {
+    margin: 0;
+    padding: .65rem .85rem;
+    font-family: var(--font-mono);
+    font-size: .76rem;
+    letter-spacing: .04em;
+    color: var(--terracotta);
+    background: rgba(182, 90, 58, .08);
+    border: 1px solid var(--terracotta);
+}
+
+.auth-submit {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.auth-submit:disabled {
+    opacity: .6;
+    cursor: wait;
+    transform: none;
+}
+
+.auth-alt {
+    margin: 1.6rem 0 0;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: .9rem;
+    color: var(--muted);
+}
+
+.auth-alt a {
+    font-family: var(--font-mono);
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--royal);
+    border-bottom: 2px solid currentColor;
+    padding-bottom: .1rem;
+    transition: color .2s var(--ease);
+}
+
+.auth-alt a:hover {
+    color: var(--royal-electric);
+}
+
+.auth-foot {
+    padding: .7rem 1.4rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: .64rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        box-shadow: 6px 6px 0 rgba(5, 5, 5, .9);
+    }
+
+    .auth-card-body {
+        padding: 1.8rem 1.2rem 1.6rem;
+    }
+}

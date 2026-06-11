@@ -38,34 +38,25 @@ export default function RegisterForm() {
   }
 
   return (
-    <form className="form-grid" onSubmit={handleSubmit}>
-      <div className="field">
+    <form className="auth-form" onSubmit={handleSubmit}>
+      <div className="auth-field">
         <label htmlFor="name" data-es="Nombre completo" data-en="Full name">Nombre completo</label>
-        <input id="name" name="name" type="text" required autoComplete="name" />
+        <input id="name" name="name" type="text" required autoComplete="name" placeholder="Tu nombre" />
       </div>
-      <div className="field">
+      <div className="auth-field">
         <label htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" required autoComplete="email" />
+        <input id="email" name="email" type="email" required autoComplete="email" placeholder="tu@email.com" />
       </div>
-      <div className="field">
-        <label htmlFor="password" data-es="Contraseña (mínimo 8 caracteres)" data-en="Password (min. 8 characters)">
-          Contraseña (mínimo 8 caracteres)
-        </label>
-        <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" />
+      <div className="auth-field">
+        <label htmlFor="password" data-es="Contraseña" data-en="Password">Contraseña</label>
+        <input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" placeholder="••••••••" />
+        <span className="auth-hint" data-es="Mínimo 8 caracteres" data-en="At least 8 characters">Mínimo 8 caracteres</span>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          <span data-es="Crear cuenta" data-en="Create account">{loading ? 'Creando…' : 'Crear cuenta'}</span>
-          <span className="arrow">→</span>
-        </button>
-        {error && (
-          <span className="form-status" style={{ fontSize: '.9rem', color: '#b3261e' }}>{error}</span>
-        )}
-      </div>
-      <p style={{ fontSize: '.9rem' }}>
-        <span data-es="¿Ya tenés cuenta? " data-en="Already have an account? ">¿Ya tenés cuenta? </span>
-        <a href="/login" data-es="Iniciá sesión" data-en="Sign in">Iniciá sesión</a>
-      </p>
+      {error && <p className="auth-error" role="alert">{error}</p>}
+      <button type="submit" className="btn btn-primary btn-lg auth-submit" disabled={loading}>
+        <span data-es="Crear cuenta" data-en="Create account">{loading ? 'Creando…' : 'Crear cuenta'}</span>
+        <span className="btn-glyph" aria-hidden="true">→</span>
+      </button>
     </form>
   );
 }

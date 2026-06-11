@@ -32,28 +32,20 @@ export default function LoginForm() {
   }
 
   return (
-    <form className="form-grid" onSubmit={handleSubmit}>
-      <div className="field">
+    <form className="auth-form" onSubmit={handleSubmit}>
+      <div className="auth-field">
         <label htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" required autoComplete="email" />
+        <input id="email" name="email" type="email" required autoComplete="email" placeholder="tu@email.com" />
       </div>
-      <div className="field">
+      <div className="auth-field">
         <label htmlFor="password" data-es="Contraseña" data-en="Password">Contraseña</label>
-        <input id="password" name="password" type="password" required autoComplete="current-password" />
+        <input id="password" name="password" type="password" required autoComplete="current-password" placeholder="••••••••" />
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          <span data-es="Entrar" data-en="Sign in">{loading ? 'Entrando…' : 'Entrar'}</span>
-          <span className="arrow">→</span>
-        </button>
-        {error && (
-          <span className="form-status" style={{ fontSize: '.9rem', color: '#b3261e' }}>{error}</span>
-        )}
-      </div>
-      <p style={{ fontSize: '.9rem' }}>
-        <span data-es="¿No tenés cuenta? " data-en="No account yet? ">¿No tenés cuenta? </span>
-        <a href="/registro" data-es="Registrate" data-en="Sign up">Registrate</a>
-      </p>
+      {error && <p className="auth-error" role="alert">{error}</p>}
+      <button type="submit" className="btn btn-primary btn-lg auth-submit" disabled={loading}>
+        <span data-es="Entrar" data-en="Sign in">{loading ? 'Entrando…' : 'Entrar'}</span>
+        <span className="btn-glyph" aria-hidden="true">→</span>
+      </button>
     </form>
   );
 }
