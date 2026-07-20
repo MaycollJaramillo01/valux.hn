@@ -6,33 +6,54 @@ export default async function SiteHeader() {
   return (
     <header className="site-header">
       <div className="container">
+        {/* Logo original conservado */}
         <a href="/" className="brand" aria-label="VALUX inicio">
           <span className="brand-word">VALUX</span>
           <span className="brand-territory">HN</span>
         </a>
+        
         <nav className="nav-main" aria-label="Navegación principal">
+          {/* NUEVA ESTRUCTURA LIMPIA DE NAVEGACIÓN */}
           <ul className="nav-list">
             <li><a href="/" data-es="Inicio" data-en="Home">Inicio</a></li>
-            <li><a href="/que-es" data-es="Qué es Valux" data-en="About">Qué es Valux</a></li>
-            <li><a href="/como-funciona" data-es="Cómo funciona" data-en="How it works">Cómo funciona</a></li>
-            <li><a href="/miembros" data-es="Miembros" data-en="Members">Miembros</a></li>
-            <li><a href="/proyectos" data-es="Proyectos" data-en="Projects">Proyectos</a></li>
-            <li><a href="/podcast" data-es="Podcast" data-en="Podcast">Podcast</a></li>
-            <li><a href="/aliados" data-es="Aliados" data-en="Partners">Aliados</a></li>
-            <li><a href="/blog" data-es="Blog" data-en="Blog">Blog</a></li>
-            <li><a href="/contacto" data-es="Contacto" data-en="Contact">Contacto</a></li>
-            <li><a href="/cursos" data-es="Cursos" data-en="Courses">Cursos</a></li>
+            
+            <li className="has-dropdown">
+              <a href="#" data-es="Nosotros" data-en="About Us">Nosotros</a>
+              <ul className="dropdown-menu">
+                <li><a href="/que-es" data-es="Qué es Valux" data-en="What is Valux">Qué es Valux</a></li>
+                <li><a href="/como-funciona" data-es="Cómo funciona" data-en="How it works">Cómo funciona</a></li>
+                <li><a href="/aliados" data-es="Aliados" data-en="Partners">Aliados</a></li>
+              </ul>
+            </li>
+            
+            <li><a href="/cursos" data-es="Academia" data-en="Academy">Academia</a></li>
+            
+            <li className="has-dropdown">
+              <a href="#" data-es="Ecosistema" data-en="Ecosystem">Ecosistema</a>
+              <ul className="dropdown-menu">
+                <li><a href="/proyectos" data-es="Proyectos" data-en="Projects">Proyectos</a></li>
+                <li><a href="/podcast" data-es="Podcast" data-en="Podcast">Podcast</a></li>
+                <li><a href="/blog" data-es="Blog" data-en="Blog">Blog</a></li>
+              </ul>
+            </li>
+            
+            <li><a href="/miembros" data-es="Comunidad" data-en="Community">Comunidad</a></li>
+            <li><a href="/marketplace" data-es="Marketplace" data-en="Marketplace">Marketplace</a></li>
           </ul>
+
           <div className="nav-cta">
             <div className="lang-toggle" role="group" aria-label="Cambiar idioma">
               <button type="button" data-lang="es">ES</button>
               <button type="button" data-lang="en">EN</button>
             </div>
+            
+            {/* LÓGICA DE AUTH.JS CONSERVADA INTACTA */}
             {session?.user && ['TEACHER', 'ADMIN'].includes((session.user as { role?: string }).role ?? '') && (
               <a href="/panel" className="btn btn-ghost btn-sm" data-es="Panel" data-en="Panel">
                 Panel
               </a>
             )}
+            
             {session?.user ? (
               <form
                 action={async () => {

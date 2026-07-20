@@ -7,8 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// 1. ROLES ACTUALIZADOS (MEMBER agregado)
 enum Role {
   USER
+  MEMBER
   TEACHER
   ADMIN
 }
@@ -21,6 +23,12 @@ enum ResourceType {
   TEXT
 }
 
+enum PitchStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id             String           @id @default(cuid())
   name           String
@@ -29,26 +37,85 @@ model User {
   role           Role             @default(USER)
   emailVerified  DateTime?
   createdAt      DateTime         @default(now())
+
+  // Relaciones del LMS
   enrollments    Enrollment[]
   coursesTaught  Course[]         @relation("CourseTeacher")
   lessonProgress LessonProgress[]
+
+  // RELACIONES NUEVAS PARA LOS BENEFICIOS
+  profile        CreatorProfile?
+  podcastPitches PodcastPitch[]
+  products       Product[]
+  purchases      Purchase[]
 }
 
-model VerificationToken {
-  token   String   @id
-  email   String
-  expires DateTime
+// BENEFICIO: Sinergias (Directorio privado)
+model CreatorProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  bio           String?
+  niche         String?
+  instagramUrl  String?
+  portfolioUrl  String?
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// BENEFICIO: Podcast
+model PodcastPitch {
+  id          String      @id @default(cuid())
+  userId      String
+  topic       String
+  description String
+  status      PitchStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// BENEFICIO: Marketplace (Tipo Hotmart)
+model Product {
+  id          String     @id @default(cuid())
+  creatorId   String
+  title       String
+  description String
+  price       Float      // Precio de venta
+  coverUrl    String?
+  downloadUrl String     // Link del recurso digital
+  published   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+
+  creator     User       @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  purchases   Purchase[]
+}
+
+// Control de ventas y comisiones
+model Purchase {
+  id          String   @id @default(cuid())
+  buyerId     String
+  productId   String
+  amountPaid  Float    // Registro del precio pagado
+  valuxFee    Float    // Split automático para la comunidad
+  createdAt   DateTime @default(now())
+
+  buyer       User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// BENEFICIO: Academia (Precio agregado)
 model Course {
   id          String       @id @default(cuid())
   slug        String       @unique
   title       String
   description String
-  coverUrl    String? // imagen de portada; sin ella se genera carátula editorial
+  price       Float        @default(0) // Precio para no-miembros
+  coverUrl    String? 
   published   Boolean      @default(false)
   teacherId   String?
   createdAt   DateTime     @default(now())
+  
   teacher     User?        @relation("CourseTeacher", fields: [teacherId], references: [id])
   sections    Section[]
   lessons     Lesson[]
@@ -73,7 +140,7 @@ model Lesson {
   content   String
   videoUrl  String?
   points    Int              @default(10)
-  duration  Int? // minutos estimados
+  duration  Int? 
   order     Int              @default(0)
   course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   section   Section?         @relation(fields: [sectionId], references: [id], onDelete: SetNull)
@@ -88,8 +155,8 @@ model Resource {
   lessonId String
   type     ResourceType
   title    String
-  url      String? // VIDEO / PDF / IMAGE / LINK
-  content  String? // TEXT
+  url      String? 
+  content  String? 
   order    Int          @default(0)
   lesson   Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 }
@@ -99,7 +166,7 @@ model LessonProgress {
   userId      String
   lessonId    String
   completedAt DateTime  @default(now())
-  score       Int? // nota del profesor (0-100), null = sin calificar
+  score       Int? 
   gradedAt    DateTime?
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -111,11 +178,17 @@ model Enrollment {
   id         String   @id @default(cuid())
   userId     String
   courseId   String
-  finalGrade Int? // nota final del curso (0-100), asignada por el profesor
-  notes      String? // observaciones del profesor
+  finalGrade Int? 
+  notes      String? 
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
+}
+
+model VerificationToken {
+  token   String   @id
+  email   String
+  expires DateTime
 }

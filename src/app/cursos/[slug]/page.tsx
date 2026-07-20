@@ -33,13 +33,13 @@ function LessonRow({
       <span className="lesson-tags">
         {lesson.duration ? <span>{lesson.duration} min</span> : null}
         <span className="pts">{lesson.points} pts</span>
-        {!enrolled && <span data-es="Bloqueada" data-en="Locked">Bloqueada</span>}
+        {!enrolled && <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold' }}>Bloqueada</span>}
       </span>
     </>
   );
 
   if (!enrolled) {
-    return <div className="lesson-row is-locked">{inner}</div>;
+    return <div className="lesson-row is-locked" style={{ opacity: 0.6, cursor: 'not-allowed' }}>{inner}</div>;
   }
   return (
     <a href={`/cursos/${courseSlug}/${lesson.slug}`} className={`lesson-row${done ? ' is-done' : ''}`}>
@@ -52,6 +52,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
   const { slug } = await params;
   const session = await auth();
 
+  // 1. EVALUAR ROL DEL USUARIO EN LA VISTA
+  const userRole = (session?.user as { role?: string })?.role ?? 'PUBLIC';
+  const isPrivileged = ['MEMBER', 'TEACHER', 'ADMIN'].includes(userRole);
+
   const course = await prisma.course.findUnique({
     where: { slug, published: true },
     include: {
@@ -60,6 +64,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
       lessons: { where: { sectionId: null }, orderBy: { order: 'asc' } },
     },
   });
+  
   if (!course) notFound();
 
   const enrollment = session?.user
@@ -84,17 +89,29 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
         ).map((p) => p.lessonId)
       : []
   );
+  
   const doneCount = allLessons.filter((l) => doneIds.has(l.id)).length;
   const pct = allLessons.length ? Math.round((doneCount / allLessons.length) * 100) : 0;
 
+  // 2. SERVER ACTION PROTEGIDO (EL PORTERO)
   async function enroll() {
     'use server';
-    const session = await auth();
-    if (!session?.user) redirect(`/login?callbackUrl=/cursos/${slug}`);
+    const currentSession = await auth();
+    if (!currentSession?.user) redirect(`/login?callbackUrl=/cursos/${slug}`);
+
+    const role = (currentSession.user as { role?: string }).role ?? 'USER';
+    const privileged = ['MEMBER', 'TEACHER', 'ADMIN'].includes(role);
+
+    // INTERCEPCIÓN DE PAGO: Si es usuario normal y el curso cuesta, lo mandamos a pagar
+    if (!privileged && course!.price > 0) {
+      redirect(`/checkout/${course!.id}`); // Ruta que construiremos después
+    }
+
+    // Si pasa la validación (es Miembro o el curso es gratis), se inscribe
     await prisma.enrollment.upsert({
-      where: { userId_courseId: { userId: session.user.id, courseId: course!.id } },
+      where: { userId_courseId: { userId: currentSession.user.id, courseId: course!.id } },
       update: {},
-      create: { userId: session.user.id, courseId: course!.id },
+      create: { userId: currentSession.user.id, courseId: course!.id },
     });
     revalidatePath(`/cursos/${slug}`);
   }
@@ -115,38 +132,50 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             <p className="course-lead">{course.description}</p>
 
             {enrolled ? (
+              // VISTA: MATRICULADO
               <div>
                 <div className="progress-bar"><span style={{ width: `${pct}%` }} /></div>
                 <p className="progress-label">
-                  {doneCount} / {allLessons.length}{' '}
-                  <span data-es="lecciones completadas" data-en="lessons completed">lecciones completadas</span>
-                  {' · '}{pct}% · {totalPoints} pts{' '}
-                  <span data-es="en juego" data-en="available">en juego</span>
+                  {doneCount} / {allLessons.length} lecciones completadas
+                  {' · '}{pct}% · {totalPoints} pts en juego
                   {enrollment?.finalGrade != null && (
                     <>
-                      {' · '}
-                      <span data-es="Nota final:" data-en="Final grade:">Nota final:</span>{' '}
-                      <strong>{enrollment.finalGrade}/100</strong>
+                      {' · '}Nota final: <strong>{enrollment.finalGrade}/100</strong>
                     </>
                   )}
                 </p>
               </div>
             ) : (
-              <form action={enroll}>
-                <button type="submit" className="btn btn-primary btn-lg">
-                  <span data-es="Inscribirme al curso" data-en="Enroll in course">Inscribirme al curso</span>
-                  <span className="btn-glyph" aria-hidden="true">→</span>
-                </button>
-              </form>
+              // 3. VISTA: BOTONES DE COMPRA O ACCESO GRATUITO SEGÚN EL ROL
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', margin: '2rem 0' }}>
+                {isPrivileged ? (
+                  <form action={enroll}>
+                    <button type="submit" className="btn btn-primary btn-lg" style={{ backgroundColor: '#111', borderColor: '#111' }}>
+                      Acceder gratis (Miembro VALUX) <span aria-hidden="true">→</span>
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <form action={enroll}>
+                      <button type="submit" className="btn btn-primary btn-lg">
+                        {course.price > 0 ? `Comprar curso por $${course.price} USD` : 'Inscribirme gratis'}
+                        <span aria-hidden="true" style={{ marginLeft: '8px' }}>→</span>
+                      </button>
+                    </form>
+                    <a href="/membresia" className="btn btn-outline btn-lg" style={{ display: 'flex', alignItems: 'center' }}>
+                      Desbloquear todo como Miembro
+                    </a>
+                  </>
+                )}
+              </div>
             )}
 
+            {/* SYLLABUS DEL CURSO */}
             <div className="syllabus">
               {course.sections.map((section, i) => (
                 <details key={section.id} className="syllabus-section" open={i === 0}>
                   <summary>
-                    <span>
-                      <span data-es="Sección" data-en="Section">Sección</span> {i + 1}: {section.title}
-                    </span>
+                    <span>Sección {i + 1}: {section.title}</span>
                     <span className="syllabus-meta">
                       {section.lessons.filter((l) => doneIds.has(l.id)).length} / {section.lessons.length}
                     </span>
@@ -162,10 +191,12 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                   ))}
                 </details>
               ))}
+              
+              {/* Lecciones sin sección */}
               {course.lessons.length > 0 && (
                 <details className="syllabus-section" open={course.sections.length === 0}>
                   <summary>
-                    <span data-es="Contenido" data-en="Content">Contenido</span>
+                    <span>Contenido General</span>
                     <span className="syllabus-meta">
                       {course.lessons.filter((l) => doneIds.has(l.id)).length} / {course.lessons.length}
                     </span>
@@ -182,6 +213,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                 </details>
               )}
             </div>
+
           </div>
         </section>
       </main>
