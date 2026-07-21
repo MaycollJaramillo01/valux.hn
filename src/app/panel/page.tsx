@@ -1,76 +1,40 @@
-import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
-import SiteHeader from '@/components/SiteHeader';
-import SiteFooter from '@/components/SiteFooter';
 
-export const metadata = { title: 'Panel docente - VALUX' };
-export const dynamic = 'force-dynamic';
+export const metadata = { title: 'Dashboard - VALUX' };
 
 export default async function PanelPage() {
   const session = await auth();
-  if (!session?.user) redirect('/login?callbackUrl=/panel');
-  const role = (session.user as { role?: string }).role;
-  if (role !== 'TEACHER' && role !== 'ADMIN') redirect('/cursos');
-
-  const courses = await prisma.course.findMany({
-    // Los ADMIN ven todos los cursos; los profesores solo los suyos.
-    where: role === 'ADMIN' ? {} : { teacherId: session.user.id },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      teacher: { select: { name: true } },
-      _count: { select: { enrollments: true, lessons: true } },
-    },
-  });
+  const userName = session?.user?.name || 'Creador';
+  const userRole = (session?.user as { role?: string })?.role ?? 'USER';
 
   return (
-    <>
-      <SiteHeader />
-      <main id="main">
-        <section className="course-shell">
-          <div className="container-narrow">
-            <p className="course-eyebrow">VX / <span data-es="Panel docente" data-en="Teacher panel">Panel docente</span></p>
-            <h1 className="course-title" data-es="Mis cursos" data-en="My courses">Mis cursos</h1>
-            <p className="course-lead" data-es="Gestioná alumnos, progreso y calificaciones." data-en="Manage students, progress and grades.">
-              Gestioná alumnos, progreso y calificaciones.
-            </p>
+    <div>
+      <header style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Hola, {userName}</h1>
+        <p style={{ color: '#475569' }}>
+          Bienvenido a tu panel de control. Tu nivel de acceso actual es: <strong>{userRole}</strong>.
+        </p>
+      </header>
 
-            {courses.length === 0 ? (
-              <p data-es="No tenés cursos asignados todavía." data-en="No courses assigned to you yet.">
-                No tenés cursos asignados todavía.
-              </p>
-            ) : (
-              <table className="panel-table">
-                <thead>
-                  <tr>
-                    <th data-es="Curso" data-en="Course">Curso</th>
-                    <th data-es="Profesor" data-en="Teacher">Profesor</th>
-                    <th data-es="Lecciones" data-en="Lessons">Lecciones</th>
-                    <th data-es="Alumnos" data-en="Students">Alumnos</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {courses.map((c) => (
-                    <tr key={c.id}>
-                      <td><strong>{c.title}</strong></td>
-                      <td>{c.teacher?.name ?? '—'}</td>
-                      <td>{c._count.lessons}</td>
-                      <td>{c._count.enrollments}</td>
-                      <td>
-                        <a href={`/panel/${c.slug}`} className="btn btn-primary btn-table">
-                          <span data-es="Gestionar" data-en="Manage">Gestionar</span>
-                        </a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </section>
-      </main>
-      <SiteFooter />
-    </>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+        
+        <div style={{ backgroundColor: '#fff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Directorio de Sinergias</h3>
+          <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            Completa tu biografía, nicho y enlaces para aparecer en la comunidad pública.
+          </p>
+          <a href="/panel/perfil" className="btn btn-outline btn-sm">Editar mi perfil</a>
+        </div>
+
+        <div style={{ backgroundColor: '#fff', padding: '1.5rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Vende en el Marketplace</h3>
+          <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            Sube tus presets, plantillas o herramientas digitales y monetiza tu conocimiento.
+          </p>
+          <a href="/panel/productos/nuevo" className="btn btn-primary btn-sm">Publicar recurso</a>
+        </div>
+
+      </div>
+    </div>
   );
 }

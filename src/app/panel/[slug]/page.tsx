@@ -91,6 +91,48 @@ export default async function PanelCoursePage({ params }: { params: Promise<{ sl
               <span data-es="lecciones" data-en="lessons">lecciones</span>
             </p>
 
+            {/* --- INICIO ZONA GESTIÓN DE TEMARIO --- */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2rem', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.25rem', margin: 0 }} data-es="Gestión del temario" data-en="Syllabus management">Gestión del temario</h2>
+              <a href={`/panel/${course.slug}/nueva-leccion`} className="btn btn-primary">
+                <span data-es="+ Nueva lección" data-en="+ New lesson">+ Nueva lección</span>
+              </a>
+            </div>
+
+            {allLessons.length === 0 ? (
+              <div className="panel-card" style={{ marginBottom: '3rem', textAlign: 'center', padding: '2rem' }}>
+                <p style={{ color: 'var(--muted)' }} data-es="No has subido ninguna lección todavía." data-en="You haven't uploaded any lessons yet.">No has subido ninguna lección todavía.</p>
+              </div>
+            ) : (
+              <div className="panel-card" style={{ marginBottom: '3rem' }}>
+                <table className="panel-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th data-es="Lección" data-en="Lesson">Lección</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allLessons.map((l, index) => (
+                      <tr key={`edit-${l.id}`}>
+                        <td style={{ width: '40px', color: 'var(--muted)' }}>{l.order ?? index + 1}</td>
+                        <td><strong>{l.title}</strong></td>
+                        <td style={{ textAlign: 'right' }}>
+                          <a href={`/panel/${course.slug}/${l.slug}/editar`} className="btn btn-ghost btn-table">
+                            <span data-es="Editar / Eliminar" data-en="Edit / Delete">Editar / Eliminar</span>
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {/* --- FIN ZONA GESTIÓN DE TEMARIO --- */}
+
+            <h2 style={{ fontSize: '1.25rem', marginTop: '3rem', marginBottom: '1rem' }} data-es="Progreso de alumnos" data-en="Student progress">Progreso de alumnos</h2>
+
             {course.enrollments.length === 0 ? (
               <p data-es="Aún no hay alumnos inscritos." data-en="No students enrolled yet.">Aún no hay alumnos inscritos.</p>
             ) : (
@@ -101,7 +143,7 @@ export default async function PanelCoursePage({ params }: { params: Promise<{ sl
                   ? Math.round((allLessons.filter((l) => doneIds.has(l.id)).length / allLessons.length) * 100)
                   : 0;
                 return (
-                  <div key={enr.id} className="panel-card">
+                  <div key={enr.id} className="panel-card" style={{ marginBottom: '1.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', alignItems: 'baseline' }}>
                       <div>
                         <strong style={{ fontSize: '1.1rem' }}>{enr.user.name}</strong>{' '}
