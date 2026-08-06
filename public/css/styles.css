@@ -1,8 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap");
 
 /* ==========================================================================
    VALUX — editorial system draft
    Direction: black editorial presence, royal-blue lead, disciplined contrast.
+   Typography: Century Gothic (a de palito) for pedagogical readability;
+   Didact Gothic is the free web fallback with the same single-story a.
    ========================================================================== */
 
 :root {
@@ -21,9 +23,9 @@
     --line: rgba(5, 5, 5, .18);
     --line-dark: rgba(255, 255, 255, .2);
 
-    --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
-    --font-body: "Fraunces", Georgia, serif;
-    --font-mono: "IBM Plex Mono", Consolas, monospace;
+    --font-display: "Century Gothic", CenturyGothic, "Didact Gothic", AppleGothic, sans-serif;
+    --font-body: "Century Gothic", CenturyGothic, "Didact Gothic", AppleGothic, sans-serif;
+    --font-mono: "Century Gothic", CenturyGothic, "Didact Gothic", AppleGothic, sans-serif;
 
     --container: 1440px;
     --container-narrow: 900px;
