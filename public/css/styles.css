@@ -1,9 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap");
 
 /* ==========================================================================
    VALUX — editorial system draft
    Direction: black editorial presence, royal-blue lead, disciplined contrast.
-   Body: Nunito (single-story a, rounded/modern, softer than Century Gothic).
+   Body: Quicksand (single-story a, rounded/modern, softer than Century Gothic).
    Display/mono keep brand identity.
    ========================================================================== */
 
@@ -24,7 +24,7 @@
     --line-dark: rgba(255, 255, 255, .2);
 
     --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
-    --font-body: "Nunito", "Century Gothic", CenturyGothic, sans-serif;
+    --font-body: "Quicksand", "Century Gothic", CenturyGothic, sans-serif;
     --font-mono: "IBM Plex Mono", Consolas, monospace;
 
     --container: 1440px;
