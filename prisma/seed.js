@@ -1,26 +1,68 @@
-/* Datos de ejemplo: profesor demo y un curso publicado con secciones,
-   lecciones con recursos y puntajes.
-   Ejecutar con: npm run db:seed */
+/* Seed de contenido de ejemplo.
+   NUNCA pongas contraseñas acá: el repo no debe poder usarse para entrar.
+   Cuentas (junta / profesor) solo si existen en .env, que no se sube a GitHub:
+     SEED_ADMIN_EMAIL, SEED_ADMIN_PASSWORD, SEED_ADMIN_NAME
+     SEED_TEACHER_EMAIL, SEED_TEACHER_PASSWORD, SEED_TEACHER_NAME */
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
-async function main() {
-  // Profesor demo (login: profe@valux.hn / profesor123)
-  const teacher = await prisma.user.upsert({
-    where: { email: 'profe@valux.hn' },
-    update: { role: 'TEACHER' },
+async function upsertStaffFromEnv(role, emailKey, passwordKey, nameKey, fallbackName) {
+  const email = (process.env[emailKey] || '').trim().toLowerCase();
+  const password = process.env[passwordKey] || '';
+  const name = (process.env[nameKey] || '').trim() || fallbackName;
+  if (!email) return null;
+  if (password.length < 12) {
+    throw new Error(`${passwordKey} debe tener al menos 12 caracteres (no se guardan claves en el repo).`);
+  }
+  return prisma.user.upsert({
+    where: { email },
+    update: { role, name, passwordHash: await bcrypt.hash(password, 12), emailVerified: new Date() },
     create: {
-      name: 'Profesor VALUX',
-      email: 'profe@valux.hn',
-      passwordHash: await bcrypt.hash('profesor123', 12),
-      role: 'TEACHER',
+      name,
+      email,
+      passwordHash: await bcrypt.hash(password, 12),
+      role,
       emailVerified: new Date(),
     },
   });
+}
 
-  // Curso de ejemplo (se recrea limpio en cada seed)
+async function main() {
+  await prisma.platformSettings.upsert({
+    where: { id: 'valux' },
+    update: {},
+    create: { id: 'valux', commissionPercent: 30, subscriptionPrice: 19 },
+  });
+
+  const admin = await upsertStaffFromEnv(
+    'ADMIN',
+    'SEED_ADMIN_EMAIL',
+    'SEED_ADMIN_PASSWORD',
+    'SEED_ADMIN_NAME',
+    'Junta VALUX'
+  );
+
+  let teacher = await upsertStaffFromEnv(
+    'TEACHER',
+    'SEED_TEACHER_EMAIL',
+    'SEED_TEACHER_PASSWORD',
+    'SEED_TEACHER_NAME',
+    'Profesor VALUX'
+  );
+  if (!teacher) {
+    teacher = await prisma.user.findFirst({ where: { role: 'TEACHER' }, orderBy: { createdAt: 'asc' } });
+  }
+
+  if (!teacher) {
+    console.log(
+      'Seed: ajustes de plataforma listos. Sin profesor en base ni SEED_TEACHER_*; se omite el curso de ejemplo.'
+    );
+    if (admin) console.log('Seed: cuenta junta creada/actualizada desde .env (sin imprimir clave).');
+    return;
+  }
+
   await prisma.course.deleteMany({ where: { slug: 'creacion-de-contenido-101' } });
   const course = await prisma.course.create({
     data: {
@@ -102,7 +144,7 @@ async function main() {
     },
   });
 
-  console.log('Seed completado. Profesor demo: profe@valux.hn / profesor123');
+  console.log('Seed completado (curso de ejemplo). Cuentas solo si vinieron por .env; no se imprimen claves.');
 }
 
 main()

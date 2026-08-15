@@ -3,12 +3,13 @@ import { auth } from '@/auth';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import RegisterForm from './RegisterForm';
+import GoogleButton from '@/components/GoogleButton';
 
 export const metadata = { title: 'Crear cuenta - VALUX' };
 
 export default async function RegisterPage() {
   const session = await auth();
-  if (session?.user) redirect('/cursos');
+  if (session?.user) redirect('/catalogo');
 
   return (
     <>
@@ -30,6 +31,7 @@ export default async function RegisterPage() {
                 Registrate para acceder a los cursos de la comunidad.
               </p>
               <RegisterForm />
+              <GoogleButton enabled={Boolean(process.env.AUTH_GOOGLE_ID)} />
               <div className="auth-alt">
                 <span data-es="¿Ya tenés cuenta?" data-en="Already have an account?">¿Ya tenés cuenta?</span>
                 <a href="/login" data-es="Iniciar sesión" data-en="Sign in">Iniciar sesión</a>

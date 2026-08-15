@@ -26,7 +26,7 @@ export default async function SiteHeader() {
               </ul>
             </li>
             
-            <li><a href="/cursos" data-es="Academia" data-en="Academy">Academia</a></li>
+            <li><a href="/catalogo" data-es="Academia" data-en="Academy">Academia</a></li>
             
             <li className="has-dropdown">
               <a href="#" data-es="Ecosistema" data-en="Ecosystem">Ecosistema</a>
@@ -38,7 +38,6 @@ export default async function SiteHeader() {
             </li>
             
             <li><a href="/miembros" data-es="Comunidad" data-en="Community">Comunidad</a></li>
-            <li><a href="/marketplace" data-es="Marketplace" data-en="Marketplace">Marketplace</a></li>
           </ul>
 
           <div className="nav-cta">
@@ -48,7 +47,7 @@ export default async function SiteHeader() {
             </div>
             
             {/* LÓGICA DE AUTH.JS CONSERVADA INTACTA */}
-            {session?.user && ['TEACHER', 'ADMIN'].includes((session.user as { role?: string }).role ?? '') && (
+            {session?.user && (
               <a href="/panel" className="btn btn-ghost btn-sm" data-es="Panel" data-en="Panel">
                 Panel
               </a>

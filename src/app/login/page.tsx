@@ -4,12 +4,13 @@ import { auth } from '@/auth';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import LoginForm from './LoginForm';
+import GoogleButton from '@/components/GoogleButton';
 
 export const metadata = { title: 'Iniciar sesión - VALUX' };
 
 export default async function LoginPage() {
   const session = await auth();
-  if (session?.user) redirect('/cursos');
+  if (session?.user) redirect('/catalogo');
 
   return (
     <>
@@ -33,6 +34,7 @@ export default async function LoginPage() {
               <Suspense>
                 <LoginForm />
               </Suspense>
+              <GoogleButton enabled={Boolean(process.env.AUTH_GOOGLE_ID)} />
               <div className="auth-alt">
                 <span data-es="¿No tenés cuenta?" data-en="No account yet?">¿No tenés cuenta?</span>
                 <a href="/registro" data-es="Crear cuenta" data-en="Create account">Crear cuenta</a>

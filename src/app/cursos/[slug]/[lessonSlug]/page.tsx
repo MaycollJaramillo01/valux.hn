@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { canAccessCourse } from '@/lib/access';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import SiteHeader from '@/components/SiteHeader';
@@ -17,22 +18,26 @@ export default async function LessonPlayerPage({ params }: { params: Promise<{ s
   }
 
   const role = (session.user as { role?: string }).role;
-  const isAdminOrTeacher = role === 'ADMIN' || role === 'TEACHER';
 
   const course = await prisma.course.findUnique({
     where: { slug },
     include: {
       lessons: { orderBy: { order: 'asc' } },
-      enrollments: { where: { userId: session.user.id } }
-    }
+    },
   });
 
   if (!course) {
-    redirect('/cursos');
+    redirect('/catalogo');
   }
 
-  const isEnrolled = course.enrollments.length > 0;
-  if (!isEnrolled && !isAdminOrTeacher) {
+  const unlocked = await canAccessCourse({
+    userId: session.user.id,
+    role,
+    courseId: course.id,
+    teacherId: course.teacherId,
+  });
+
+  if (!unlocked) {
     redirect(`/cursos/${slug}`);
   }
 

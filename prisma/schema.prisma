@@ -7,10 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 1. ROLES ACTUALIZADOS (MEMBER agregado)
 enum Role {
   USER
   MEMBER
+  ASSOCIATE
   TEACHER
   ADMIN
 }
@@ -29,41 +29,66 @@ enum PitchStatus {
   REJECTED
 }
 
-model User {
-  id             String           @id @default(cuid())
-  name           String
-  email          String           @unique
-  passwordHash   String
-  role           Role             @default(USER)
-  emailVerified  DateTime?
-  createdAt      DateTime         @default(now())
+enum ContentStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  REJECTED
+}
 
-  // Relaciones del LMS
+enum SaleKind {
+  COURSE
+  PRODUCT
+  SUBSCRIPTION
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
+enum PayoutStatus {
+  PENDING
+  TRANSFERRED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String?
+  googleId      String?   @unique
+  role          Role      @default(USER)
+  paypalEmail   String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+
   enrollments    Enrollment[]
   coursesTaught  Course[]         @relation("CourseTeacher")
   lessonProgress LessonProgress[]
-
-  // RELACIONES NUEVAS PARA LOS BENEFICIOS
   profile        CreatorProfile?
   podcastPitches PodcastPitch[]
   products       Product[]
   purchases      Purchase[]
+  blogPosts      BlogPost[]
+  salesBought    Sale[]           @relation("SaleBuyer")
+  salesSold      Sale[]           @relation("SaleSeller")
+  subscriptions  PlatformSubscription[]
+  payouts        MonthlyPayout[]
 }
 
-// BENEFICIO: Sinergias (Directorio privado)
 model CreatorProfile {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  bio           String?
-  niche         String?
-  instagramUrl  String?
-  portfolioUrl  String?
-  updatedAt     DateTime @updatedAt
-
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  bio          String?
+  niche        String?
+  instagramUrl String?
+  portfolioUrl String?
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// BENEFICIO: Podcast
 model PodcastPitch {
   id          String      @id @default(cuid())
   userId      String
@@ -71,55 +96,58 @@ model PodcastPitch {
   description String
   status      PitchStatus @default(PENDING)
   createdAt   DateTime    @default(now())
-
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// BENEFICIO: Marketplace (Tipo Hotmart)
 model Product {
-  id          String     @id @default(cuid())
-  creatorId   String
-  title       String
-  description String
-  price       Float      // Precio de venta
-  coverUrl    String?
-  downloadUrl String     // Link del recurso digital
-  published   Boolean    @default(false)
-  createdAt   DateTime   @default(now())
+  id              String        @id @default(cuid())
+  creatorId       String
+  title           String
+  description     String
+  price           Float
+  coverUrl        String?
+  downloadUrl     String
+  published       Boolean       @default(false)
+  reviewStatus    ContentStatus @default(PENDING)
+  rejectionReason String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  creator     User       @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  purchases   Purchase[]
+  creator   User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  purchases Purchase[]
+  sales     Sale[]
 }
 
-// Control de ventas y comisiones
 model Purchase {
+  id         String   @id @default(cuid())
+  buyerId    String
+  productId  String
+  amountPaid Float
+  valuxFee   Float
+  createdAt  DateTime @default(now())
+
+  buyer   User    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, productId])
+}
+
+model Course {
   id          String   @id @default(cuid())
-  buyerId     String
-  productId   String
-  amountPaid  Float    // Registro del precio pagado
-  valuxFee    Float    // Split automático para la comunidad
+  slug        String   @unique
+  title       String
+  description String
+  price       Float    @default(0)
+  coverUrl    String?
+  published   Boolean  @default(false)
+  teacherId   String?
   createdAt   DateTime @default(now())
 
-  buyer       User     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-}
-
-// BENEFICIO: Academia (Precio agregado)
-model Course {
-  id          String       @id @default(cuid())
-  slug        String       @unique
-  title       String
-  description String
-  price       Float        @default(0) // Precio para no-miembros
-  coverUrl    String? 
-  published   Boolean      @default(false)
-  teacherId   String?
-  createdAt   DateTime     @default(now())
-  
   teacher     User?        @relation("CourseTeacher", fields: [teacherId], references: [id])
   sections    Section[]
   lessons     Lesson[]
   enrollments Enrollment[]
+  sales       Sale[]
 }
 
 model Section {
@@ -140,7 +168,7 @@ model Lesson {
   content   String
   videoUrl  String?
   points    Int              @default(10)
-  duration  Int? 
+  duration  Int?
   order     Int              @default(0)
   course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   section   Section?         @relation(fields: [sectionId], references: [id], onDelete: SetNull)
@@ -155,8 +183,8 @@ model Resource {
   lessonId String
   type     ResourceType
   title    String
-  url      String? 
-  content  String? 
+  url      String?
+  content  String?
   order    Int          @default(0)
   lesson   Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 }
@@ -166,7 +194,7 @@ model LessonProgress {
   userId      String
   lessonId    String
   completedAt DateTime  @default(now())
-  score       Int? 
+  score       Int?
   gradedAt    DateTime?
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -178,8 +206,8 @@ model Enrollment {
   id         String   @id @default(cuid())
   userId     String
   courseId   String
-  finalGrade Int? 
-  notes      String? 
+  finalGrade Int?
+  notes      String?
   createdAt  DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -191,4 +219,84 @@ model VerificationToken {
   token   String   @id
   email   String
   expires DateTime
+}
+
+model BlogPost {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  authorId        String
+  title           String
+  excerpt         String
+  body            String
+  coverUrl        String?
+  status          ContentStatus @default(DRAFT)
+  rejectionReason String?
+  publishedAt     DateTime?
+  notifySentAt    DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  author          User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model NewsletterSubscriber {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  confirmedAt  DateTime  @default(now())
+  unsubscribedAt DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model PlatformSettings {
+  id                 String @id @default("valux")
+  commissionPercent  Float  @default(30)
+  subscriptionPrice  Float  @default(19)
+  paypalClientHint   String?
+}
+
+model PlatformSubscription {
+  id                   String             @id @default(cuid())
+  userId               String
+  status               SubscriptionStatus @default(ACTIVE)
+  startedAt            DateTime           @default(now())
+  currentPeriodEnd     DateTime
+  paypalSubscriptionId String?
+  createdAt            DateTime           @default(now())
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Sale {
+  id             String   @id @default(cuid())
+  kind           SaleKind
+  buyerId        String
+  sellerId       String?
+  courseId       String?
+  productId      String?
+  amountPaid     Float
+  valuxFee       Float
+  sellerAmount   Float
+  currency       String   @default("USD")
+  paypalOrderId  String?  @unique
+  paidAt         DateTime @default(now())
+  periodYm       String
+  createdAt      DateTime @default(now())
+
+  buyer   User     @relation("SaleBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller  User?    @relation("SaleSeller", fields: [sellerId], references: [id], onDelete: SetNull)
+  course  Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model MonthlyPayout {
+  id            String       @id @default(cuid())
+  sellerId      String
+  periodYm      String
+  amountDue     Float
+  status        PayoutStatus @default(PENDING)
+  dueAt         DateTime
+  transferredAt DateTime?
+  notes         String?
+  createdAt     DateTime     @default(now())
+  seller        User         @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@unique([sellerId, periodYm])
 }

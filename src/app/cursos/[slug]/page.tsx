@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { hasFullCatalogAccess } from '@/lib/access';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 
@@ -54,7 +55,9 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
 
   // 1. EVALUAR ROL DEL USUARIO EN LA VISTA
   const userRole = (session?.user as { role?: string })?.role ?? 'PUBLIC';
-  const isPrivileged = ['MEMBER', 'TEACHER', 'ADMIN'].includes(userRole);
+  const fullAccess = session?.user
+    ? await hasFullCatalogAccess(session.user.id, userRole)
+    : false;
 
   const course = await prisma.course.findUnique({
     where: { slug, published: true },
@@ -100,11 +103,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
     if (!currentSession?.user) redirect(`/login?callbackUrl=/cursos/${slug}`);
 
     const role = (currentSession.user as { role?: string }).role ?? 'USER';
-    const privileged = ['MEMBER', 'TEACHER', 'ADMIN'].includes(role);
+    const privileged = await hasFullCatalogAccess(currentSession.user.id, role);
 
-    // INTERCEPCIÓN DE PAGO: Si es usuario normal y el curso cuesta, lo mandamos a pagar
     if (!privileged && course!.price > 0) {
-      redirect(`/checkout/${course!.id}`); // Ruta que construiremos después
+      redirect(`/checkout?kind=COURSE&id=${course!.id}`);
     }
 
     // Si pasa la validación (es Miembro o el curso es gratis), se inscribe
@@ -116,7 +118,11 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
     revalidatePath(`/cursos/${slug}`);
   }
 
-  const enrolled = Boolean(enrollment);
+  const enrolled =
+    Boolean(enrollment) ||
+    fullAccess ||
+    (session?.user && userRole === 'TEACHER' && course.teacherId === session.user.id) ||
+    userRole === 'ADMIN';
 
   return (
     <>
@@ -148,10 +154,10 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
             ) : (
               // 3. VISTA: BOTONES DE COMPRA O ACCESO GRATUITO SEGÚN EL ROL
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', margin: '2rem 0' }}>
-                {isPrivileged ? (
+                {fullAccess ? (
                   <form action={enroll}>
                     <button type="submit" className="btn btn-primary btn-lg" style={{ backgroundColor: '#111', borderColor: '#111' }}>
-                      Acceder gratis (Miembro VALUX) <span aria-hidden="true">→</span>
+                      Acceder (incluido en tu acceso VALUX) <span aria-hidden="true">→</span>
                     </button>
                   </form>
                 ) : (
@@ -162,8 +168,8 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                         <span aria-hidden="true" style={{ marginLeft: '8px' }}>→</span>
                       </button>
                     </form>
-                    <a href="/membresia" className="btn btn-outline btn-lg" style={{ display: 'flex', alignItems: 'center' }}>
-                      Desbloquear todo como Miembro
+                    <a href="/suscripcion" className="btn btn-outline btn-lg" style={{ display: 'flex', alignItems: 'center' }}>
+                      Desbloquear todo con suscripción
                     </a>
                   </>
                 )}

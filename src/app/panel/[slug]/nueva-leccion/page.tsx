@@ -1,8 +1,6 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
-import SiteHeader from '@/components/SiteHeader';
-import SiteFooter from '@/components/SiteFooter';
 
 export const metadata = { title: 'Nueva Lección - VALUX' };
 export const dynamic = 'force-dynamic';
@@ -72,8 +70,7 @@ export default async function NewLessonPage({ params }: { params: Promise<{ slug
 
   return (
     <>
-      <SiteHeader />
-      <main id="main" style={{ backgroundColor: '#f8fafc', minHeight: '80vh', padding: '3rem 0' }}>
+      <main style={{ padding: 0 }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1.5rem' }}>
           
           <header style={{ marginBottom: '2rem' }}>
@@ -145,7 +142,6 @@ export default async function NewLessonPage({ params }: { params: Promise<{ slug
           </form>
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

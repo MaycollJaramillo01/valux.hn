@@ -1,26 +1,31 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
+import { canPublishDirect, canSellProducts } from '@/lib/access';
+import { getSettings } from '@/lib/access';
+import PriceSplitField from '@/components/PriceSplitField';
 
 export const metadata = { title: 'Publicar Producto - VALUX' };
 
 export default async function NewProductPage() {
   const session = await auth();
-  
-  if (!session?.user) {
-    redirect('/login');
-  }
+  const role = (session?.user as { role?: string })?.role;
+  if (!session?.user) redirect('/login');
+  if (!canSellProducts(role)) redirect('/panel');
+  const settings = await getSettings();
+  const direct = canPublishDirect(role);
 
   async function createProduct(formData: FormData) {
     'use server';
-    
     const session = await auth();
-    if (!session?.user?.id) return;
+    const role = (session?.user as { role?: string })?.role;
+    if (!session?.user?.id || !canSellProducts(role)) return;
 
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
     const price = Number(formData.get('price'));
     const downloadUrl = formData.get('downloadUrl') as string;
+    const publishNow = canPublishDirect(role);
 
     await prisma.product.create({
       data: {
@@ -28,9 +33,10 @@ export default async function NewProductPage() {
         description,
         price,
         downloadUrl,
-        published: false,
-        creatorId: session.user.id
-      }
+        published: publishNow,
+        reviewStatus: publishNow ? 'PUBLISHED' : 'PENDING',
+        creatorId: session.user.id,
+      },
     });
 
     redirect('/panel/productos');
@@ -46,7 +52,9 @@ export default async function NewProductPage() {
           Nuevo Recurso
         </h1>
         <p style={{ color: '#475569', fontSize: '1.125rem' }}>
-          Sube tu infoproducto. Recuerda que todos los recursos pasan por una revisión de calidad antes de ser publicados en la tienda.
+          {direct
+            ? 'Como junta, el recurso queda publicado de inmediato.'
+            : 'El recurso entra en revisión. La junta aprueba o rechaza con un motivo visible.'}
         </p>
       </header>
 
@@ -94,29 +102,11 @@ export default async function NewProductPage() {
           />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <label htmlFor="price" style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>
-            Precio (USD)
-          </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#64748b' }}>$</span>
-            <input 
-              type="number" 
-              id="price" 
-              name="price"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              style={{ padding: '0.75rem', border: '1px solid #cbd5e1', fontFamily: 'inherit', maxWidth: '150px' }}
-              required
-            />
-            <span style={{ fontSize: '0.875rem', color: '#64748b' }}>Deja 0 para recursos gratuitos.</span>
-          </div>
-        </div>
+        <PriceSplitField commissionPercent={settings.commissionPercent} />
 
         <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
           <button type="submit" className="btn btn-primary">
-            Enviar a revisión
+            {direct ? 'Publicar' : 'Enviar a revisión'}
           </button>
           <a href="/panel" className="btn btn-ghost">
             Cancelar

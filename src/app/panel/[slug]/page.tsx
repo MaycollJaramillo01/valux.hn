@@ -2,8 +2,6 @@ import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import SiteHeader from '@/components/SiteHeader';
-import SiteFooter from '@/components/SiteFooter';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,9 +73,7 @@ export default async function PanelCoursePage({ params }: { params: Promise<{ sl
   }
 
   return (
-    <>
-      <SiteHeader />
-      <main id="main">
+    <div>
         <section className="course-shell">
           <div className="container-narrow">
             <p className="course-eyebrow">
@@ -225,8 +221,6 @@ export default async function PanelCoursePage({ params }: { params: Promise<{ sl
             )}
           </div>
         </section>
-      </main>
-      <SiteFooter />
-    </>
+    </div>
   );
 }
