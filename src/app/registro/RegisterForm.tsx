@@ -42,7 +42,7 @@ export default function RegisterForm() {
 
     // Cuenta activa de inmediato: iniciar sesión automáticamente.
     await signIn('credentials', { email, password, redirect: false });
-    router.push('/cursos');
+    router.push('/catalogo');
     router.refresh();
   }
 

@@ -2,66 +2,74 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import { canSellProducts, canTeachCourses, canWriteBlog, isJunta } from '@/lib/access';
+import { roleLabel } from '@/lib/access';
 
-export default async function PanelLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} className="btn btn-ghost" style={{ justifyContent: 'flex-start', padding: '0.75rem 1rem' }}>
+      {children}
+    </a>
+  );
+}
+
+export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-
-  if (!session?.user) {
-    redirect('/login?callbackUrl=/panel');
-  }
-
+  if (!session?.user) redirect('/login?callbackUrl=/panel');
   const role = (session.user as { role?: string }).role ?? 'USER';
 
   return (
     <>
       <SiteHeader />
       <div style={{ display: 'flex', minHeight: '80vh', backgroundColor: '#f8fafc' }}>
-        
-        {/* BARRA LATERAL (SIDEBAR) */}
         <aside style={{ width: '260px', backgroundColor: '#fff', borderRight: '1px solid #e2e8f0', padding: '2rem 1.5rem' }}>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            
-            <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              Mi Cuenta
+            <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase' }}>
+              {roleLabel(role)}
             </p>
-            <a href="/panel" className="btn btn-ghost" style={{ justifyContent: 'flex-start', padding: '0.75rem 1rem' }}>
-              <span aria-hidden="true" style={{ marginRight: '8px' }}>📊</span> Dashboard
-            </a>
-            
-            <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', margin: '1.5rem 0 0.5rem' }}>
-              Sinergias
-            </p>
-            <a href="/panel/perfil" className="btn btn-ghost" style={{ justifyContent: 'flex-start', padding: '0.75rem 1rem' }}>
-              <span aria-hidden="true" style={{ marginRight: '8px' }}>👤</span> Perfil de Creador
-            </a>
-            <a href="/panel/productos" className="btn btn-ghost" style={{ justifyContent: 'flex-start', padding: '0.75rem 1rem' }}>
-              <span aria-hidden="true" style={{ marginRight: '8px' }}>📦</span> Mis Productos
-            </a>
+            <NavLink href="/panel">Dashboard</NavLink>
+            <NavLink href="/panel/ventas">Mis ventas</NavLink>
+            <NavLink href="/catalogo">Academia</NavLink>
 
-            {/* Renderizado condicional: Solo ADMIN y TEACHER ven esto */}
-            {(role === 'TEACHER' || role === 'ADMIN') && (
+            {(canWriteBlog(role) || canSellProducts(role)) && (
               <>
                 <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', margin: '1.5rem 0 0.5rem' }}>
-                  Administración
+                  Publicar
                 </p>
-                <a href="/panel/docencia" className="btn btn-ghost" style={{ justifyContent: 'flex-start', padding: '0.75rem 1rem' }}>
-                  <span aria-hidden="true" style={{ marginRight: '8px' }}>👨‍🏫</span> Panel Docente
-                </a>
+                {canWriteBlog(role) && <NavLink href="/panel/blog">Blog</NavLink>}
+                {canSellProducts(role) && <NavLink href="/panel/productos">Marketplace</NavLink>}
               </>
             )}
-            
+
+            {canTeachCourses(role) && (
+              <>
+                <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', margin: '1.5rem 0 0.5rem' }}>
+                  Docencia
+                </p>
+                <NavLink href="/panel/docencia">Mis cursos</NavLink>
+                <NavLink href="/panel/cursos/nuevo">Nuevo curso</NavLink>
+              </>
+            )}
+
+            {isJunta(role) && (
+              <>
+                <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', margin: '1.5rem 0 0.5rem' }}>
+                  Junta
+                </p>
+                <NavLink href="/panel/junta/revisiones">Revisiones</NavLink>
+                <NavLink href="/panel/junta/asociados">Personas</NavLink>
+                <NavLink href="/panel/junta/liquidaciones">Liquidaciones</NavLink>
+                <NavLink href="/panel/junta/suscripciones">Suscripciones</NavLink>
+              </>
+            )}
+
+            <p style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', margin: '1.5rem 0 0.5rem' }}>
+              Cuenta
+            </p>
+            <NavLink href="/panel/perfil">Perfil</NavLink>
           </nav>
         </aside>
-
-        {/* CONTENIDO DINÁMICO (Acá se inyecta page.tsx) */}
-        <main style={{ flex: 1, padding: '2rem 3rem' }}>
-          {children}
-        </main>
-
+        <main style={{ flex: 1, padding: '2rem 3rem' }}>{children}</main>
       </div>
       <SiteFooter />
     </>

@@ -243,13 +243,24 @@
         revealEls.forEach(el => el.classList.add('in'));
     }
 
-    // ---------- Newsletter (stub) ----------
+    // ---------- Newsletter ----------
     document.querySelectorAll('.newsletter').forEach(form => {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const input = form.querySelector('input[type="email"]');
             if (!input || !input.value) return;
-            form.innerHTML = '<p style="color:#fff;font-weight:600;margin:0;">¡Gracias! Te avisaremos pronto.</p>';
+            try {
+                const res = await fetch('/api/newsletter/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: input.value }),
+                });
+                form.innerHTML = res.ok
+                    ? '<p style="color:#fff;font-weight:600;margin:0;">Listo. Te avisamos con cada publicación nueva del blog.</p>'
+                    : '<p style="color:#fff;font-weight:600;margin:0;">No se pudo guardar el correo. Intentá de nuevo.</p>';
+            } catch {
+                form.innerHTML = '<p style="color:#fff;font-weight:600;margin:0;">No se pudo guardar el correo. Intentá de nuevo.</p>';
+            }
         });
     });
 

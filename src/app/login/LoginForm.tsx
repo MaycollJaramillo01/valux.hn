@@ -27,7 +27,7 @@ export default function LoginForm() {
       setError('Credenciales incorrectas o cuenta sin confirmar. Revisá tu correo si acabás de registrarte.');
       return;
     }
-    router.push(searchParams.get('callbackUrl') ?? '/cursos');
+    router.push(searchParams.get('callbackUrl') ?? '/catalogo');
     router.refresh();
   }
 

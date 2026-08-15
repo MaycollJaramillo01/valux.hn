@@ -9,7 +9,6 @@ const staticPages = [
   'proyectos',
   'podcast',
   'aliados',
-  'blog',
   'contacto',
   'apoya',
 ];

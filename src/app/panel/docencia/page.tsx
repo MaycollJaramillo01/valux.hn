@@ -1,8 +1,6 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import SiteHeader from '@/components/SiteHeader';
-import SiteFooter from '@/components/SiteFooter';
 
 export const metadata = { title: 'Panel docente - VALUX' };
 export const dynamic = 'force-dynamic';
@@ -11,7 +9,7 @@ export default async function PanelPage() {
   const session = await auth();
   if (!session?.user) redirect('/login?callbackUrl=/panel');
   const role = (session.user as { role?: string }).role;
-  if (role !== 'TEACHER' && role !== 'ADMIN') redirect('/cursos');
+  if (role !== 'TEACHER' && role !== 'ADMIN') redirect('/panel');
 
   const courses = await prisma.course.findMany({
     // Los ADMIN ven todos los cursos; los profesores solo los suyos.
@@ -24,9 +22,7 @@ export default async function PanelPage() {
   });
 
   return (
-    <>
-      <SiteHeader />
-      <main id="main">
+    <div>
         <section className="course-shell">
           <div className="container-narrow">
             <p className="course-eyebrow">VX / <span data-es="Panel docente" data-en="Teacher panel">Panel docente</span></p>
@@ -69,8 +65,6 @@ export default async function PanelPage() {
             )}
           </div>
         </section>
-      </main>
-      <SiteFooter />
-    </>
+    </div>
   );
 }
