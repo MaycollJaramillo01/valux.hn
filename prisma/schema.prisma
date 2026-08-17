@@ -59,8 +59,10 @@ model User {
   email         String    @unique
   passwordHash  String?
   googleId      String?   @unique
-  role          Role      @default(USER)
-  paypalEmail   String?
+  role                 Role      @default(USER)
+  paypalEmail          String?
+  isActive             Boolean   @default(true)
+  mustChangePassword   Boolean   @default(false)
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
 

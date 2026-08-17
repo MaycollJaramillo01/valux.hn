@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
+import { prisma } from '@/lib/prisma';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import { canSellProducts, canTeachCourses, canWriteBlog, isJunta } from '@/lib/access';
@@ -17,6 +18,11 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const session = await auth();
   if (!session?.user) redirect('/login?callbackUrl=/panel');
   const role = (session.user as { role?: string }).role ?? 'USER';
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { isActive: true, mustChangePassword: true },
+  });
+  if (dbUser && !dbUser.isActive) redirect('/login');
 
   return (
     <>
@@ -28,7 +34,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
               {roleLabel(role)}
             </p>
             <NavLink href="/panel">Dashboard</NavLink>
-            <NavLink href="/panel/ventas">Mis ventas</NavLink>
+            {(canSellProducts(role) || canTeachCourses(role)) && (
+              <NavLink href="/panel/ventas">Mis ventas</NavLink>
+            )}
             <NavLink href="/catalogo">Academia</NavLink>
 
             {(canWriteBlog(role) || canSellProducts(role)) && (
@@ -58,8 +66,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
                 </p>
                 <NavLink href="/panel/junta/revisiones">Revisiones</NavLink>
                 <NavLink href="/panel/junta/asociados">Personas</NavLink>
+                <NavLink href="/panel/junta/clientes">Clientes</NavLink>
+                <NavLink href="/panel/junta/suscripciones">Suscripción</NavLink>
                 <NavLink href="/panel/junta/liquidaciones">Liquidaciones</NavLink>
-                <NavLink href="/panel/junta/suscripciones">Suscripciones</NavLink>
               </>
             )}
 

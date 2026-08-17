@@ -55,7 +55,7 @@ export default async function NuevoCursoPage() {
   return (
     <div style={{ maxWidth: 800 }}>
       <h1>Nuevo curso</h1>
-      <p style={{ color: '#475569' }}>Podés incluir video desde el inicio y luego sumar lecciones, PDF y recursos.</p>
+      <p style={{ color: '#475569' }}>Título, precio y primera lección.</p>
       <form action={createCourse} style={{ display: 'grid', gap: '1rem', background: '#fff', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
         <input name="title" required placeholder="Título del curso" style={{ padding: '0.75rem' }} />
         <textarea name="description" required rows={5} placeholder="Descripción" style={{ padding: '0.75rem' }} />

@@ -76,7 +76,7 @@ export default async function JuntaRevisionesPage() {
   return (
     <div>
       <h1>Revisiones</h1>
-      <p style={{ color: '#475569', marginBottom: '2rem' }}>Cola de blog y marketplace. Toda decisión deja motivo visible si se rechaza.</p>
+      <p style={{ color: '#475569', marginBottom: '2rem' }}>Blog y marketplace pendientes. Si rechazás, el motivo se ve.</p>
 
       <section style={{ marginBottom: '3rem' }}>
         <h2>Blog pendiente</h2>

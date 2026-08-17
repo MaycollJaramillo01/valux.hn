@@ -15,6 +15,11 @@ const staticPages = [
 
 const nextConfig = {
   outputFileTracingRoot: import.meta.dirname,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '8mb',
+    },
+  },
   async rewrites() {
     return {
       afterFiles: [
