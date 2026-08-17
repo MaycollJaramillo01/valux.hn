@@ -52,9 +52,7 @@ export default async function NewProductPage() {
           Nuevo Recurso
         </h1>
         <p style={{ color: '#475569', fontSize: '1.125rem' }}>
-          {direct
-            ? 'Como junta, el recurso queda publicado de inmediato.'
-            : 'El recurso entra en revisión. La junta aprueba o rechaza con un motivo visible.'}
+          {direct ? 'Se publica ya.' : 'Entra a revisión.'}
         </p>
       </header>
 

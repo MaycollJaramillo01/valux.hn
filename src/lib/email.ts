@@ -16,14 +16,22 @@ function fromAddress() {
 }
 
 function valuxEmailShell(inner: string, footer = 'VALUX / Honduras') {
-  return `
+  return `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body style="margin:0;padding:0;">
   <div style="background:#050505;padding:32px 16px;">
     <div style="font-family:'Quicksand',CenturyGothic,Arial,sans-serif;max-width:520px;margin:0 auto;padding:28px;background:#f5f1ea;color:#050505;">
       <p style="font-family:Consolas,monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#1e50a0;margin:0 0 8px;">VALUX / HN</p>
       ${inner}
       <p style="font-size:12px;color:#6e675d;margin:32px 0 0;border-top:1px solid rgba(5,5,5,.12);padding-top:16px;">${footer}</p>
     </div>
-  </div>`;
+  </div>
+</body>
+</html>`;
 }
 
 async function sendResend(to: string | string[], subject: string, html: string) {
@@ -39,6 +47,26 @@ async function sendResend(to: string | string[], subject: string, html: string) 
     const detail = await res.text().catch(() => '');
     throw new Error(`Resend respondió ${res.status}: ${detail}`);
   }
+}
+
+export async function sendNewsletterWelcomeEmail(to: string) {
+  const blogUrl = `${appBaseUrl()}/blog`;
+  await sendResend(
+    to,
+    'Gracias por sumarte a VALUX',
+    valuxEmailShell(
+      `
+      <h1 style="font-size:26px;margin:8px 0 16px;">Gracias por estar.</h1>
+      <p>Ya estás en las novedades de VALUX. Cuando salga una nota nueva en el blog, te la mandamos acá.</p>
+      <p>Este correo no es un cobro ni una cuenta: es solo el hilo de lo que se publica.</p>
+      <p style="margin:28px 0;">
+        <a href="${blogUrl}" style="background:#1e50a0;color:#fff;padding:12px 22px;text-decoration:none;font-family:Consolas,monospace;font-size:13px;letter-spacing:1px;">IR AL BLOG</a>
+      </p>
+      <p style="font-size:13px;color:#6e675d;">Si no fuiste vos, ignorá este mensaje.</p>
+    `,
+      'VALUX / Honduras · novedades del blog'
+    )
+  );
 }
 
 export function emailVerificationEnabled() {

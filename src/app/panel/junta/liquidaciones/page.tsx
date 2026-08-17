@@ -35,10 +35,7 @@ export default async function LiquidacionesPage() {
   return (
     <div>
       <h1>Liquidaciones</h1>
-      <p style={{ color: '#475569', maxWidth: 720 }}>
-        A fin de mes ves cuánto acreditar a cada vendedor (70% de sus ventas sueltas). Plazo: 10 días después de
-        cerrado el mes. La recaudación de suscripción se asigna a mano.
-      </p>
+      <p style={{ color: '#475569' }}>A acreditar a cada vendedor. Plazo: día 10.</p>
       <p style={{ margin: '1rem 0 2rem' }}>
         Recaudado en suscripciones (100% VALUX hasta asignar):{' '}
         <strong>${(subscriptions._sum.amountPaid ?? 0).toFixed(2)} USD</strong>

@@ -27,9 +27,7 @@ export default async function ProductsListPage() {
           <h1 style={{ fontSize: '2.5rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
             Mis Productos
           </h1>
-          <p style={{ color: '#475569', fontSize: '1.125rem' }}>
-            Gestiona los recursos digitales que has subido a la comunidad.
-          </p>
+          <p style={{ color: '#475569' }}>Tus recursos en el marketplace.</p>
         </div>
         <a href="/panel/productos/nuevo" className="btn btn-primary">
           + Nuevo Recurso

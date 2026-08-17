@@ -35,10 +35,9 @@ export default function PriceSplitField({
         />
       </div>
       <p style={{ marginTop: '0.85rem', fontSize: '0.9rem', color: '#334155' }}>
-        El usuario paga <strong>${split.amount.toFixed(2)}</strong>. VALUX ({split.commissionPercent}%) se queda{' '}
-        <strong>${split.valuxFee.toFixed(2)}</strong>. Vos recibís{' '}
-        <strong>${split.sellerAmount.toFixed(2)}</strong>. VALUX te lo acredita a más tardar el día 10 del mes
-        siguiente.
+        El usuario paga <strong>${split.amount.toFixed(2)}</strong>. VALUX {split.commissionPercent}%:{' '}
+        <strong>${split.valuxFee.toFixed(2)}</strong>. Vos:{' '}
+        <strong>${split.sellerAmount.toFixed(2)}</strong>.
       </p>
     </div>
   );
