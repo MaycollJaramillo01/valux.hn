@@ -1005,37 +1005,53 @@ section {
     overflow: hidden;
     padding: 1.1rem;
     border: 2px solid var(--ink);
-    color: var(--ink);
-    background: var(--paper-2);
-    transition: color .22s var(--ease), background .22s var(--ease), transform .22s var(--ease);
+    color: var(--paper);
+    isolation: isolate;
+    background-color: var(--ink);
+    background-size: cover;
+    background-position: center;
+    transition: transform .22s var(--ease);
+}
+
+.project-cover::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(180deg, rgba(5, 5, 5, .22) 0%, rgba(5, 5, 5, .72) 100%);
+    transition: background .22s var(--ease);
+}
+
+.project-cover > * {
+    position: relative;
+    z-index: 1;
 }
 
 .project-cover:hover {
     transform: translateY(-4px);
-    color: var(--paper);
-    background: var(--ink);
+}
+
+.project-cover:hover::before {
+    background: linear-gradient(180deg, rgba(5, 5, 5, .38) 0%, rgba(5, 5, 5, .84) 100%);
 }
 
 .project-cover-large {
     grid-column: span 2;
     grid-row: span 2;
-    color: var(--paper);
-    background: var(--royal);
+    background-image: url("../Assets/proyectos/creador-fest.jpg");
 }
 
 .project-cover-blue {
     grid-column: span 2;
-    color: var(--paper);
-    background: var(--royal);
+    background-image: url("../Assets/proyectos/vivi-honduras.jpg");
 }
 
 .project-cover-paper {
-    background: var(--paper-2);
+    background-image: url("../Assets/proyectos/podcast-valux.jpg");
 }
 
 .project-cover-clay {
-    color: var(--paper);
-    background: var(--clay);
+    background-image: url("../Assets/proyectos/punto-cero.jpg");
 }
 
 .cover-type {
@@ -1046,6 +1062,7 @@ section {
     font-weight: 900;
     line-height: .78;
     text-transform: uppercase;
+    text-shadow: 0 8px 28px rgba(5, 5, 5, .45);
 }
 
 .project-cover-large .cover-type {
@@ -1941,7 +1958,45 @@ section {
     min-height: 12rem;
     aspect-ratio: 16 / 10;
     border-bottom: 2px solid var(--ink);
-    background: var(--royal);
+    background-color: var(--ink);
+    background-size: cover;
+    background-position: center;
+}
+
+.project-card .media-fest {
+    background-image:
+        linear-gradient(180deg, rgba(5, 5, 5, .08) 20%, rgba(5, 5, 5, .42) 100%),
+        url("../Assets/proyectos/creador-fest.jpg");
+}
+
+.project-card .media-garaje {
+    background-image:
+        linear-gradient(180deg, rgba(5, 5, 5, .08) 20%, rgba(5, 5, 5, .42) 100%),
+        url("../Assets/proyectos/garaje-creativo.jpg");
+}
+
+.project-card .media-podcast {
+    background-image:
+        linear-gradient(180deg, rgba(5, 5, 5, .08) 20%, rgba(5, 5, 5, .42) 100%),
+        url("../Assets/proyectos/podcast-valux.jpg");
+}
+
+.project-card .media-turismo {
+    background-image:
+        linear-gradient(180deg, rgba(5, 5, 5, .08) 20%, rgba(5, 5, 5, .42) 100%),
+        url("../Assets/proyectos/vivi-honduras.jpg");
+}
+
+.project-card .media-empresa {
+    background-image:
+        linear-gradient(180deg, rgba(5, 5, 5, .08) 20%, rgba(5, 5, 5, .42) 100%),
+        url("../Assets/proyectos/formacion-empresarial.jpg");
+}
+
+.project-card .media-comunidad {
+    background-image:
+        linear-gradient(180deg, rgba(5, 5, 5, .08) 20%, rgba(5, 5, 5, .42) 100%),
+        url("../Assets/proyectos/punto-cero.jpg");
 }
 
 .project-card .media::after,
