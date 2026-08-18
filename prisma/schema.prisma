@@ -337,6 +337,17 @@ model MembershipApplication {
   updatedAt        DateTime          @updatedAt
 }
 
+model PaypalIntent {
+  id             String   @id @default(cuid())
+  paypalOrderId  String   @unique
+  kind           String
+  itemId         String?
+  buyerId        String?
+  amount         Float
+  months         Int?
+  createdAt      DateTime @default(now())
+}
+
 model Donation {
   id             String         @id @default(cuid())
   monthlyAmount  Float

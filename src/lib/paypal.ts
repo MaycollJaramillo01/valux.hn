@@ -65,9 +65,31 @@ export async function capturePaypalOrder(orderId: string) {
       email_address?: string;
       name?: { given_name?: string; surname?: string };
     };
-    purchase_units?: { custom_id?: string; amount?: { value?: string } }[];
+    purchase_units?: {
+      custom_id?: string;
+      amount?: { value?: string };
+      payments?: { captures?: { amount?: { value?: string } }[] };
+    }[];
   };
   return data;
+}
+
+export function paypalCapturedAmount(captured: {
+  purchase_units?: {
+    amount?: { value?: string };
+    payments?: { captures?: { amount?: { value?: string } }[] };
+  }[];
+}) {
+  const raw =
+    captured.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value ??
+    captured.purchase_units?.[0]?.amount?.value;
+  const paid = Number(raw);
+  return Number.isFinite(paid) && paid > 0 ? paid : null;
+}
+
+export function amountsMatch(expected: number, paid: number | null) {
+  if (paid == null) return false;
+  return Math.abs(expected - paid) < 0.02;
 }
 
 export function parseAssociateMonths(months: unknown) {

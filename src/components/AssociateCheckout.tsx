@@ -1,25 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { PaypalButtons } from '@/types/paypal';
 
 const TERMS: { months: 3 | 6 | 12; label: string }[] = [
   { months: 3, label: '3 meses' },
   { months: 6, label: '6 meses' },
   { months: 12, label: '1 año' },
 ];
-
-type PaypalButtons = {
-  render: (el: HTMLElement) => Promise<void>;
-  close?: () => Promise<void>;
-};
-
-declare global {
-  interface Window {
-    paypal?: {
-      Buttons: (opts: Record<string, unknown>) => PaypalButtons;
-    };
-  }
-}
 
 export default function AssociateCheckout({
   monthly,
@@ -56,7 +44,7 @@ export default function AssociateCheckout({
           const res = await fetch('/api/paypal/capture-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId: data.orderID, kind: 'SUBSCRIPTION' }),
+            body: JSON.stringify({ orderId: data.orderID }),
           });
           const payload = await res.json();
           if (!res.ok) {

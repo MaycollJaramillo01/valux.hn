@@ -1,25 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { PaypalButtons } from '@/types/paypal';
 
 type Props = {
   amount: number;
   months: 3 | 6 | 12;
   clientId: string;
 };
-
-type PaypalButtons = {
-  render: (el: HTMLElement) => Promise<void>;
-  close?: () => Promise<void>;
-};
-
-declare global {
-  interface Window {
-    paypal?: {
-      Buttons: (opts: Record<string, unknown>) => PaypalButtons;
-    };
-  }
-}
 
 export default function PayPalDonation({ amount, months, clientId }: Props) {
   const host = useRef<HTMLDivElement>(null);
@@ -48,7 +36,7 @@ export default function PayPalDonation({ amount, months, clientId }: Props) {
           const res = await fetch('/api/paypal/capture-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId: data.orderID, kind: 'DONATION' }),
+            body: JSON.stringify({ orderId: data.orderID }),
           });
           const payload = await res.json();
           if (!res.ok) {
