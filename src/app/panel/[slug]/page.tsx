@@ -2,6 +2,8 @@ import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { deleteManagedCourse } from '@/lib/courses';
+import ConfirmDeleteForm from '@/components/ConfirmDeleteForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,6 +72,19 @@ export default async function PanelCoursePage({ params }: { params: Promise<{ sl
     const enrollmentId = String(formData.get('enrollmentId'));
     await prisma.enrollment.delete({ where: { id: enrollmentId } });
     revalidatePath(`/panel/${slug}`);
+  }
+
+  async function deleteCourse() {
+    'use server';
+    const session = await auth();
+    if (!session?.user) return;
+    const role = (session.user as { role?: string }).role;
+    const ok = await deleteManagedCourse({
+      courseId: course.id,
+      userId: session.user.id,
+      role,
+    });
+    if (ok) redirect('/panel/docencia');
   }
 
   return (
@@ -219,6 +234,21 @@ export default async function PanelCoursePage({ params }: { params: Promise<{ sl
                 );
               })
             )}
+
+            <div className="panel-card" style={{ marginTop: '3rem', background: '#fef2f2', border: '1px solid #fca5a5' }}>
+              <h2 style={{ fontSize: '1.125rem', margin: '0 0 0.5rem', color: '#991b1b' }}>Eliminar curso</h2>
+              <p style={{ color: '#7f1d1d', fontSize: '0.9rem', marginBottom: '1rem' }}>
+                Se borra del catálogo, con lecciones e inscripciones. Los cobros ya hechos se conservan.
+              </p>
+              <ConfirmDeleteForm
+                action={deleteCourse}
+                message={`¿Eliminar el curso «${course.title}»? Esta acción no se puede deshacer.`}
+              >
+                <button type="submit" className="btn btn-ghost btn-table" style={{ color: '#fff', background: '#ef4444', borderColor: '#ef4444' }}>
+                  Eliminar curso definitivamente
+                </button>
+              </ConfirmDeleteForm>
+            </div>
           </div>
         </section>
     </div>
