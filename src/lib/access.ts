@@ -52,9 +52,23 @@ export async function hasActiveSubscription(userId: string) {
   return Boolean(sub);
 }
 
-/** Asociado, junta o suscripción de plataforma activa (MEMBER legacy). No incluye profesor. */
+export async function associateSeatActive(userId: string, role?: string | null) {
+  if (role === 'ADMIN') return true;
+  if (role !== 'ASSOCIATE') return false;
+  const subs = await prisma.platformSubscription.findMany({
+    where: { userId },
+    select: { status: true, currentPeriodEnd: true },
+  });
+  if (subs.length === 0) return true;
+  const now = new Date();
+  return subs.some((sub) => sub.status === 'ACTIVE' && sub.currentPeriodEnd > now);
+}
+
+/** Asociado con asiento activo, junta, o suscripción legacy. Profesor no entra por acá. */
 export async function hasFullCatalogAccess(userId: string, role?: string | null) {
-  if (role === 'ADMIN' || role === 'ASSOCIATE' || role === 'MEMBER') return true;
+  if (role === 'ADMIN') return true;
+  if (role === 'ASSOCIATE') return associateSeatActive(userId, role);
+  if (role === 'MEMBER') return true;
   return hasActiveSubscription(userId);
 }
 
@@ -110,6 +124,6 @@ export async function getSettings() {
   return prisma.platformSettings.upsert({
     where: { id: 'valux' },
     update: {},
-    create: { id: 'valux', commissionPercent: 30, subscriptionPrice: 19 },
+    create: { id: 'valux', commissionPercent: 30, subscriptionPrice: 20 },
   });
 }

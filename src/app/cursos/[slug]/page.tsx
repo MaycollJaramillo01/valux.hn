@@ -169,7 +169,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
                       </button>
                     </form>
                     <a href="/suscripcion" className="btn btn-outline btn-lg" style={{ display: 'flex', alignItems: 'center' }}>
-                      Desbloquear todo con suscripción
+                      Conviértete en asociado
                     </a>
                   </>
                 )}

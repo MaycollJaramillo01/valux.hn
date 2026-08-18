@@ -40,8 +40,8 @@ export default async function SuscripcionesPage() {
 
   return (
     <div>
-      <h1>Suscripción</h1>
-      <p style={{ color: '#475569' }}>Precio de ahora en adelante. Lo ya cobrado no cambia.</p>
+      <h1>Asociación</h1>
+      <p style={{ color: '#475569' }}>Precio mensual de asociado. El compromiso (3, 6 o 12 meses) se cobra completo por PayPal. Lo ya cobrado no cambia.</p>
 
       <form
         action={savePrice}
@@ -59,7 +59,7 @@ export default async function SuscripcionesPage() {
         <h2 style={{ margin: 0, fontSize: '1.15rem' }}>Precio global</h2>
         <div>
           <label htmlFor="subscriptionPrice" style={{ fontWeight: 700, fontSize: '0.875rem' }}>
-            Suscripción global (USD)
+            Asociación mensual (USD)
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontWeight: 700 }}>$</span>

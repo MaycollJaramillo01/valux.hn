@@ -1552,22 +1552,88 @@ section {
     margin-bottom: 1rem;
 }
 
-.amount-grid a {
+.amount-grid a,
+.amount-grid button,
+.commitment-grid button {
     display: inline-flex;
     min-height: 50px;
     align-items: center;
     justify-content: center;
     border: 2px solid var(--ink);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
     font-family: var(--font-mono);
     font-weight: 800;
     text-transform: uppercase;
 }
 
 .amount-grid a:hover,
-.amount-grid a.active {
+.amount-grid a.active,
+.amount-grid button:hover,
+.amount-grid button.active,
+.commitment-grid button:hover,
+.commitment-grid button.active {
     color: var(--paper);
     background: var(--royal);
     border-color: var(--royal);
+}
+
+.commitment-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.donation-custom {
+    display: grid;
+    gap: .4rem;
+    margin-bottom: 1rem;
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.donation-custom input {
+    min-height: 50px;
+    padding: 0 .8rem;
+    border: 2px solid var(--ink);
+    background: #fff;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.donation-total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    text-transform: uppercase;
+}
+
+.donation-total b {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 800;
+    text-transform: none;
+}
+
+.donation-paypal {
+    position: relative;
+    z-index: 1;
+    margin-top: .4rem;
+}
+
+.donation-wait {
+    margin: 0 0 .6rem;
+    padding: .8rem;
+    border: 1px solid rgba(5, 5, 5, .18);
 }
 
 .donation-main-btn {
@@ -2151,6 +2217,103 @@ form label {
     text-transform: uppercase;
 }
 
+.form-grid,
+.apply-form {
+    display: grid;
+    gap: 1.15rem;
+}
+
+.apply-form {
+    border: 2px solid var(--ink);
+    background: var(--paper-2);
+    padding: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    gap: 1.15rem;
+}
+
+.apply-form textarea {
+    min-height: 7rem;
+}
+
+.apply-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.field-check {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+}
+
+.apply-form input[type="checkbox"] {
+    width: 1.15rem;
+    min-height: 1.15rem;
+    margin-top: .15rem;
+    flex-shrink: 0;
+}
+
+.field-check label {
+    text-transform: none;
+    font-family: inherit;
+    font-size: .95rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.apply-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.apply-note {
+    margin-top: 1rem;
+    font-size: .9rem;
+    color: var(--grey-500);
+}
+
+.apply-section {
+    margin: .5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--royal);
+}
+
+.apply-legal {
+    margin: 0;
+    font-size: .92rem;
+    line-height: 1.5;
+}
+
+.field-hint {
+    display: block;
+    margin-top: .35rem;
+    font-size: .8rem;
+    color: var(--grey-500);
+}
+
+.apply-form input[type="file"] {
+    padding: .55rem;
+}
+
+@media (min-width: 640px) {
+    .form-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
 /* Responsive */
 @media (min-width: 760px) {
     h1 {
@@ -2436,7 +2599,8 @@ form label {
     .footer-grid,
     .org-row,
     .impact-strip-grid,
-    .amount-grid {
+    .amount-grid,
+    .commitment-grid {
         grid-template-columns: 1fr;
     }
 

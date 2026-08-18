@@ -8,14 +8,6 @@ type Props = {
   clientId: string;
 };
 
-declare global {
-  interface Window {
-    paypal?: {
-      Buttons: (opts: Record<string, unknown>) => { render: (el: HTMLElement) => void };
-    };
-  }
-}
-
 export default function PayPalCheckout({ kind, itemId, clientId }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +34,7 @@ export default function PayPalCheckout({ kind, itemId, clientId }: Props) {
           const res = await fetch('/api/paypal/capture-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ orderId: data.orderID, kind, id: itemId }),
+            body: JSON.stringify({ orderId: data.orderID }),
           });
           const payload = await res.json();
           if (!res.ok) {

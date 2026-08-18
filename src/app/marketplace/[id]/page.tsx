@@ -51,7 +51,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                     </a>
                     {!fullAccess && (
                       <a href="/suscripcion" className="btn btn-outline btn-lg">
-                        Desbloquear todo con suscripción
+                        Conviértete en asociado
                       </a>
                     )}
                   </>

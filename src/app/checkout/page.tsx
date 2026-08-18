@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getSettings, hasFullCatalogAccess } from '@/lib/access';
 import { paypalConfigured } from '@/lib/paypal';
 import PayPalCheckout from '@/components/PayPalCheckout';
+import AssociateCheckout from '@/components/AssociateCheckout';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import { redirect } from 'next/navigation';
@@ -28,13 +29,28 @@ export default async function CheckoutPage({
   if (kind === 'SUBSCRIPTION') {
     if (fullAccess) redirect('/catalogo');
     return (
-      <CheckoutShell
-        title="Suscripción VALUX"
-        description="Acceso a todos los cursos y recursos del marketplace mientras la suscripción esté activa. Publicar en el blog no está incluido."
-        amount={settings.subscriptionPrice}
-        kind="SUBSCRIPTION"
-        clientId={clientId}
-      />
+      <>
+        <SiteHeader />
+        <main id="main">
+          <section className="bg-soft">
+            <div className="container" style={{ maxWidth: 640, padding: '4rem 1.5rem' }}>
+              <p className="eyebrow">Asociación VALUX</p>
+              <h1 style={{ textTransform: 'none' }}>Conviértete en asociado</h1>
+              <p className="lead">
+                Desbloqueás todo el catálogo y podés publicar en el blog y el marketplace (la junta revisa). ${settings.subscriptionPrice.toFixed(2)} USD al mes, con compromiso de 3, 6 o 12 meses.
+              </p>
+              {paypalConfigured() && clientId ? (
+                <AssociateCheckout monthly={settings.subscriptionPrice} clientId={clientId} />
+              ) : (
+                <p style={{ marginTop: '1.5rem', padding: '1rem', background: '#fff', border: '1px solid #e2e8f0' }}>
+                  El cobro con PayPal todavía no está activo. VALUX lo habilita en cuanto la pasarela esté conectada.
+                </p>
+              )}
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </>
     );
   }
 

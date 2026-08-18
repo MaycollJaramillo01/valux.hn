@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { roleLabel } from '@/lib/access';
-import { canSellProducts, canTeachCourses, canWriteBlog, isJunta } from '@/lib/access';
+import { canSellProducts, canTeachCourses, canWriteBlog, isJunta, associateSeatActive } from '@/lib/access';
 
 export const metadata = { title: 'Dashboard - VALUX' };
 
@@ -8,6 +8,8 @@ export default async function PanelPage() {
   const session = await auth();
   const userName = session?.user?.name || 'VALUX';
   const userRole = (session?.user as { role?: string })?.role ?? 'USER';
+  const seat = session?.user ? await associateSeatActive(session.user.id, userRole) : false;
+  const showJoin = userRole === 'USER' || userRole === 'MEMBER' || (userRole === 'ASSOCIATE' && !seat);
 
   return (
     <div>
@@ -24,19 +26,21 @@ export default async function PanelPage() {
           <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Formación y marketplace.</p>
           <a href="/catalogo" className="btn btn-primary btn-sm">Abrir catálogo</a>
         </div>
+        {showJoin && (
         <div style={{ backgroundColor: '#fff', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
-          <h3>Suscripción</h3>
-          <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Todo el catálogo.</p>
-          <a href="/suscripcion" className="btn btn-outline btn-sm">Ver suscripción</a>
+          <h3>Asociación</h3>
+          <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Catálogo completo y publicación.</p>
+          <a href="/suscripcion" className="btn btn-outline btn-sm">Conviértete en asociado</a>
         </div>
-        {canWriteBlog(userRole) && (
+        )}
+        {canWriteBlog(userRole) && (isJunta(userRole) || seat) && (
           <div style={{ backgroundColor: '#fff', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
             <h3>Blog</h3>
             <p style={{ color: '#64748b', fontSize: '0.875rem' }}>{userRole === 'ADMIN' ? 'Notas nuevas.' : 'Enviar a revisión.'}</p>
             <a href="/panel/blog" className="btn btn-outline btn-sm">Ir al blog</a>
           </div>
         )}
-        {canSellProducts(userRole) && (
+        {canSellProducts(userRole) && (isJunta(userRole) || seat) && (
           <div style={{ backgroundColor: '#fff', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
             <h3>Marketplace</h3>
             <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Nuevo recurso.</p>
@@ -53,8 +57,8 @@ export default async function PanelPage() {
         {isJunta(userRole) && (
           <div style={{ backgroundColor: '#fff', padding: '1.5rem', border: '1px solid #e2e8f0' }}>
             <h3>Junta</h3>
-            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Personas, clientes y cobros.</p>
-            <a href="/panel/junta/suscripciones" className="btn btn-outline btn-sm">Suscripción</a>
+            <p style={{ color: '#64748b', fontSize: '0.875rem' }}>Fichas, personas, clientes y cobros.</p>
+            <a href="/panel/junta/aplicaciones" className="btn btn-outline btn-sm">Fichas de ingreso</a>
           </div>
         )}
       </div>

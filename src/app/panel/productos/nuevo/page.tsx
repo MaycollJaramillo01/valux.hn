@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
-import { canPublishDirect, canSellProducts } from '@/lib/access';
+import { canPublishDirect, canSellProducts, associateSeatActive, isJunta } from '@/lib/access';
 import { getSettings } from '@/lib/access';
 import PriceSplitField from '@/components/PriceSplitField';
 
@@ -11,7 +11,7 @@ export default async function NewProductPage() {
   const session = await auth();
   const role = (session?.user as { role?: string })?.role;
   if (!session?.user) redirect('/login');
-  if (!canSellProducts(role)) redirect('/panel');
+  if (!canSellProducts(role) || !(isJunta(role) || (await associateSeatActive(session.user.id, role)))) redirect('/panel');
   const settings = await getSettings();
   const direct = canPublishDirect(role);
 
