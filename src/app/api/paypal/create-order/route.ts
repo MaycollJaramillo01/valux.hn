@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { createPaypalOrder, parseAssociateMonths, parseDonationPledge, paypalConfigured } from '@/lib/paypal';
+import { ASSOCIATE_TERM_MONTHS, createPaypalOrder, parseDonationPledge, paypalConfigured } from '@/lib/paypal';
 import { getSettings } from '@/lib/access';
 
 async function rememberIntent(data: {
@@ -58,17 +58,14 @@ export async function POST(request: Request) {
   }
 
   if (body.kind === 'SUBSCRIPTION') {
-    const months = parseAssociateMonths(body.months);
-    if (!months) {
-      return NextResponse.json({ error: 'Elegí un compromiso de 3, 6 o 12 meses' }, { status: 400 });
-    }
+    const months = ASSOCIATE_TERM_MONTHS;
     const settings = await getSettings();
     const monthly = settings.subscriptionPrice;
     if (monthly <= 0) {
       return NextResponse.json({ error: 'Este ítem no requiere pago' }, { status: 400 });
     }
     const amount = Math.round(monthly * months * 100) / 100;
-    const description = `Asociación VALUX · $${monthly.toFixed(2)}/mes × ${months} meses`;
+    const description = `Asociación VALUX · $${monthly.toFixed(2)}/mes × 1 año`;
     const order = await createPaypalOrder(amount, description, `assoc:${session.user.id}:${months}`);
     await rememberIntent({
       paypalOrderId: order.id,

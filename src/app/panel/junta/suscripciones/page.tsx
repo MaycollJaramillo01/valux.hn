@@ -41,7 +41,7 @@ export default async function SuscripcionesPage() {
   return (
     <div>
       <h1>Asociación</h1>
-      <p style={{ color: '#475569' }}>Precio mensual de asociado. El compromiso (3, 6 o 12 meses) se cobra completo por PayPal. Lo ya cobrado no cambia.</p>
+      <p style={{ color: '#475569' }}>Precio mensual de asociado. El compromiso es de un año y se cobra completo por PayPal. Lo ya cobrado no cambia.</p>
 
       <form
         action={savePrice}

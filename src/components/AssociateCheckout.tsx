@@ -3,11 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PaypalButtons } from '@/types/paypal';
 
-const TERMS: { months: 3 | 6 | 12; label: string }[] = [
-  { months: 3, label: '3 meses' },
-  { months: 6, label: '6 meses' },
-  { months: 12, label: '1 año' },
-];
+const ASSOCIATE_MONTHS = 12;
 
 export default function AssociateCheckout({
   monthly,
@@ -16,10 +12,9 @@ export default function AssociateCheckout({
   monthly: number;
   clientId: string;
 }) {
-  const [months, setMonths] = useState<3 | 6 | 12>(3);
   const host = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const total = Math.round(monthly * months * 100) / 100;
+  const total = Math.round(monthly * ASSOCIATE_MONTHS * 100) / 100;
 
   useEffect(() => {
     const scriptId = 'paypal-sdk';
@@ -34,7 +29,7 @@ export default function AssociateCheckout({
           const res = await fetch('/api/paypal/create-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ kind: 'SUBSCRIPTION', months }),
+            body: JSON.stringify({ kind: 'SUBSCRIPTION' }),
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'No se pudo crear el pago');
@@ -75,35 +70,16 @@ export default function AssociateCheckout({
       cancelled = true;
       buttons?.close?.().catch(() => undefined);
     };
-  }, [months, clientId]);
+  }, [clientId]);
 
   return (
     <div>
-      <p className="panel-kicker" style={{ marginTop: '1.5rem' }}>
-        Compromiso
-      </p>
-      <div className="commitment-grid" role="radiogroup" aria-label="Duración del compromiso">
-        {TERMS.map((term) => (
-          <button
-            key={term.months}
-            type="button"
-            role="radio"
-            aria-checked={months === term.months}
-            className={months === term.months ? 'active' : ''}
-            onClick={() => setMonths(term.months)}
-          >
-            {term.label}
-          </button>
-        ))}
-      </div>
       <p className="donation-total">
-        <span>
-          ${monthly.toFixed(2)} / mes · {months === 12 ? '1 año' : `${months} meses`}
-        </span>
+        <span>${monthly.toFixed(2)} / mes · 1 año</span>
         <b>${total.toFixed(2)} USD</b>
       </p>
       <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1rem' }}>
-        PayPal cobra ahora el total. Pasás a asociado: catálogo completo, blog y marketplace en revisión de junta.
+        El compromiso de asociado es de un año. PayPal cobra ahora el total. Pasás a asociado: catálogo completo, blog y marketplace en revisión de junta.
       </p>
       {error && (
         <p className="auth-error" role="alert">
