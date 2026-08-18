@@ -2,6 +2,8 @@ import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { isJunta } from '@/lib/access';
 import { parseStaffRole, wouldLeaveNoAdmin } from '@/lib/staff';
+import { peopleQuery, searchNameOrEmail } from '@/lib/people-search';
+import JuntaSearchBar from '@/components/JuntaSearchBar';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
@@ -15,12 +17,22 @@ const field: CSSProperties = {
   fontFamily: 'inherit',
 };
 
-export default async function AsociadosPage() {
+export default async function AsociadosPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; error?: string }>;
+}) {
   const session = await auth();
   if (!session?.user || !isJunta((session.user as { role?: string }).role)) redirect('/panel');
 
+  const { q: rawQ, error } = await searchParams;
+  const q = peopleQuery(rawQ);
+
   const users = await prisma.user.findMany({
-    where: { role: { in: ['ASSOCIATE', 'TEACHER', 'ADMIN'] } },
+    where: {
+      role: { in: ['ASSOCIATE', 'TEACHER', 'ADMIN'] },
+      ...searchNameOrEmail(q),
+    },
     orderBy: { createdAt: 'desc' },
     select: { id: true, name: true, email: true, role: true, isActive: true },
   });
@@ -33,10 +45,12 @@ export default async function AsociadosPage() {
     const email = String(formData.get('email') || '').trim().toLowerCase();
     const password = String(formData.get('password') || '');
     const role = parseStaffRole(formData.get('role'));
-    if (!name || name.length < 2 || !email.includes('@') || password.length < 8 || !role) return;
-    if (role === 'USER') return;
+    if (!name || name.length < 2 || !email.includes('@') || password.length < 8 || !role) {
+      redirect('/panel/junta/asociados?error=datos');
+    }
+    if (role === 'USER') redirect('/panel/junta/asociados?error=datos');
     const exists = await prisma.user.findUnique({ where: { email } });
-    if (exists) return;
+    if (exists) redirect('/panel/junta/asociados?error=existe');
     await prisma.user.create({
       data: {
         name,
@@ -47,6 +61,7 @@ export default async function AsociadosPage() {
       },
     });
     revalidatePath('/panel/junta/asociados');
+    redirect('/panel/junta/asociados');
   }
 
   async function setRole(formData: FormData) {
@@ -92,6 +107,14 @@ export default async function AsociadosPage() {
         }}
       >
         <p style={{ gridColumn: '1 / -1', margin: 0, fontWeight: 700 }}>Nueva persona</p>
+        {error === 'existe' ? (
+          <p style={{ gridColumn: '1 / -1', margin: 0, color: '#b91c1c' }}>Ya hay una cuenta con ese email.</p>
+        ) : null}
+        {error === 'datos' ? (
+          <p style={{ gridColumn: '1 / -1', margin: 0, color: '#b91c1c' }}>
+            Revisá nombre, email, rol y contraseña (mínimo 8 caracteres).
+          </p>
+        ) : null}
         <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem' }}>
           Nombre
           <input name="name" required minLength={2} style={field} />
@@ -117,7 +140,9 @@ export default async function AsociadosPage() {
         </button>
       </form>
 
-      <table style={{ width: '100%', marginTop: '2rem', background: '#fff', borderCollapse: 'collapse' }}>
+      <JuntaSearchBar action="/panel/junta/asociados" q={q} />
+
+      <table style={{ width: '100%', marginTop: '1.25rem', background: '#fff', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
             <th style={{ textAlign: 'left', padding: '0.75rem' }}>Nombre</th>
@@ -127,34 +152,42 @@ export default async function AsociadosPage() {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
-            <tr key={user.id} style={{ borderTop: '1px solid #e2e8f0' }}>
-              <td style={{ padding: '0.75rem' }}>{user.name}</td>
-              <td style={{ padding: '0.75rem' }}>{user.email}</td>
-              <td style={{ padding: '0.75rem' }}>
-                <form action={setRole} style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input type="hidden" name="id" value={user.id} />
-                  <select name="role" defaultValue={user.role} style={{ padding: '0.4rem' }}>
-                    <option value="USER">Usuario</option>
-                    <option value="ASSOCIATE">Asociado</option>
-                    <option value="TEACHER">Profesor</option>
-                    <option value="ADMIN">Junta</option>
-                  </select>
-                  <button className="btn btn-ghost btn-sm">Guardar</button>
-                </form>
-              </td>
-              <td style={{ padding: '0.75rem' }}>
-                {user.isActive ? 'Activo' : 'Inactivo'}
-                {user.id !== session.user.id ? (
-                  <form action={setActive} style={{ display: 'inline', marginLeft: '0.5rem' }}>
-                    <input type="hidden" name="id" value={user.id} />
-                    <input type="hidden" name="next" value={user.isActive ? '0' : '1'} />
-                    <button className="btn btn-ghost btn-sm">{user.isActive ? 'Desactivar' : 'Activar'}</button>
-                  </form>
-                ) : null}
+          {users.length === 0 ? (
+            <tr>
+              <td colSpan={4} style={{ padding: '1rem', color: '#64748b' }}>
+                {q ? 'Nadie coincide con esa búsqueda.' : 'Todavía no hay personas.'}
               </td>
             </tr>
-          ))}
+          ) : (
+            users.map((user) => (
+              <tr key={user.id} style={{ borderTop: '1px solid #e2e8f0' }}>
+                <td style={{ padding: '0.75rem' }}>{user.name}</td>
+                <td style={{ padding: '0.75rem' }}>{user.email}</td>
+                <td style={{ padding: '0.75rem' }}>
+                  <form action={setRole} style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="hidden" name="id" value={user.id} />
+                    <select name="role" defaultValue={user.role} style={{ padding: '0.4rem' }}>
+                      <option value="USER">Usuario</option>
+                      <option value="ASSOCIATE">Asociado</option>
+                      <option value="TEACHER">Profesor</option>
+                      <option value="ADMIN">Junta</option>
+                    </select>
+                    <button className="btn btn-ghost btn-sm">Guardar</button>
+                  </form>
+                </td>
+                <td style={{ padding: '0.75rem' }}>
+                  {user.isActive ? 'Activo' : 'Inactivo'}
+                  {user.id !== session.user.id ? (
+                    <form action={setActive} style={{ display: 'inline', marginLeft: '0.5rem' }}>
+                      <input type="hidden" name="id" value={user.id} />
+                      <input type="hidden" name="next" value={user.isActive ? '0' : '1'} />
+                      <button className="btn btn-ghost btn-sm">{user.isActive ? 'Desactivar' : 'Activar'}</button>
+                    </form>
+                  ) : null}
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

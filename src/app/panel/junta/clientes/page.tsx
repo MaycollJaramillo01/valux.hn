@@ -1,13 +1,23 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { isJunta } from '@/lib/access';
+import { peopleQuery, searchNameOrEmail } from '@/lib/people-search';
+import JuntaSearchBar from '@/components/JuntaSearchBar';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import bcrypt from 'bcryptjs';
+import type { CSSProperties } from 'react';
 
 export const metadata = { title: 'Clientes - Junta VALUX' };
 export const dynamic = 'force-dynamic';
 
 type Filtro = 'todos' | 'suscripcion' | 'compras' | 'ambos' | 'sin';
+
+const field: CSSProperties = {
+  padding: '0.75rem',
+  border: '1px solid #cbd5e1',
+  fontFamily: 'inherit',
+};
 
 function subStatus(sub: { status: string; currentPeriodEnd: Date } | null, now: Date) {
   if (!sub) return { key: 'nunca' as const, label: 'Nunca' };
@@ -18,22 +28,34 @@ function subStatus(sub: { status: string; currentPeriodEnd: Date } | null, now: 
   return { key: 'vencida' as const, label: `Vencida (${sub.currentPeriodEnd.toLocaleDateString('es-HN')})` };
 }
 
+function clientesHref(opts: { filtro: string; q?: string; id?: string }) {
+  const params = new URLSearchParams();
+  params.set('filtro', opts.filtro);
+  if (opts.q) params.set('q', opts.q);
+  if (opts.id) params.set('id', opts.id);
+  return `/panel/junta/clientes?${params.toString()}`;
+}
+
 export default async function ClientesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filtro?: string; id?: string }>;
+  searchParams: Promise<{ filtro?: string; id?: string; q?: string; error?: string }>;
 }) {
   const session = await auth();
   if (!session?.user || !isJunta((session.user as { role?: string }).role)) redirect('/panel');
 
-  const { filtro: rawFiltro, id } = await searchParams;
+  const { filtro: rawFiltro, id, q: rawQ, error } = await searchParams;
+  const q = peopleQuery(rawQ);
   const filtro = (['todos', 'suscripcion', 'compras', 'ambos', 'sin'].includes(rawFiltro || '')
     ? rawFiltro
     : 'todos') as Filtro;
   const now = new Date();
 
   const users = await prisma.user.findMany({
-    where: { role: { in: ['USER', 'MEMBER'] } },
+    where: {
+      role: { in: ['USER', 'MEMBER'] },
+      ...searchNameOrEmail(q),
+    },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -70,6 +92,31 @@ export default async function ClientesPage({
 
   const selected = id ? rows.find((row) => row.user.id === id) : null;
 
+  async function createClient(formData: FormData) {
+    'use server';
+    const session = await auth();
+    if (!session?.user || !isJunta((session.user as { role?: string }).role)) return;
+    const name = String(formData.get('name') || '').trim();
+    const email = String(formData.get('email') || '').trim().toLowerCase();
+    const password = String(formData.get('password') || '');
+    if (!name || name.length < 2 || !email.includes('@') || password.length < 8) {
+      redirect('/panel/junta/clientes?error=datos');
+    }
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists) redirect('/panel/junta/clientes?error=existe');
+    await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash: await bcrypt.hash(password, 12),
+        role: 'USER',
+        emailVerified: new Date(),
+      },
+    });
+    revalidatePath('/panel/junta/clientes');
+    redirect('/panel/junta/clientes');
+  }
+
   async function makeAssociate(formData: FormData) {
     'use server';
     const session = await auth();
@@ -93,11 +140,52 @@ export default async function ClientesPage({
       <h1>Clientes</h1>
       <p style={{ color: '#475569' }}>Compras y suscripciones pagadas.</p>
 
+      <form
+        action={createClient}
+        style={{
+          marginTop: '2rem',
+          background: '#fff',
+          padding: '1.5rem',
+          border: '1px solid #e2e8f0',
+          display: 'grid',
+          gap: '1rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          alignItems: 'end',
+        }}
+      >
+        <p style={{ gridColumn: '1 / -1', margin: 0, fontWeight: 700 }}>Nuevo cliente</p>
+        {error === 'existe' ? (
+          <p style={{ gridColumn: '1 / -1', margin: 0, color: '#b91c1c' }}>Ya hay una cuenta con ese email.</p>
+        ) : null}
+        {error === 'datos' ? (
+          <p style={{ gridColumn: '1 / -1', margin: 0, color: '#b91c1c' }}>
+            Revisá nombre, email y contraseña (mínimo 8 caracteres).
+          </p>
+        ) : null}
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem' }}>
+          Nombre
+          <input name="name" required minLength={2} style={field} />
+        </label>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem' }}>
+          Email
+          <input name="email" type="email" required style={field} />
+        </label>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem' }}>
+          Contraseña inicial
+          <input name="password" type="password" required minLength={8} autoComplete="new-password" style={field} />
+        </label>
+        <button type="submit" className="btn btn-primary">
+          Crear
+        </button>
+      </form>
+
+      <JuntaSearchBar action="/panel/junta/clientes" q={q} hidden={{ filtro }} />
+
       <p style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', margin: '1.5rem 0' }}>
         {filters.map((item) => (
           <a
             key={item.id}
-            href={`/panel/junta/clientes?filtro=${item.id}`}
+            href={clientesHref({ filtro: item.id, q })}
             className={filtro === item.id ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
           >
             {item.label}
@@ -120,7 +208,7 @@ export default async function ClientesPage({
           {rows.length === 0 ? (
             <tr>
               <td colSpan={6} style={{ padding: '1rem', color: '#64748b' }}>
-                Nadie en este filtro.
+                {q ? 'Nadie coincide con esa búsqueda.' : 'Nadie en este filtro.'}
               </td>
             </tr>
           ) : (
@@ -132,7 +220,7 @@ export default async function ClientesPage({
                 <td style={{ padding: '0.75rem' }}>{row.courseCount}</td>
                 <td style={{ padding: '0.75rem' }}>{row.productCount}</td>
                 <td style={{ padding: '0.75rem' }}>
-                  <a href={`/panel/junta/clientes?filtro=${filtro}&id=${row.user.id}`} className="btn btn-ghost btn-sm">
+                  <a href={clientesHref({ filtro, q, id: row.user.id })} className="btn btn-ghost btn-sm">
                     Ver pagos
                   </a>
                 </td>
