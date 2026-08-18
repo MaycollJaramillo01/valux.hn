@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { canWriteBlog, canPublishDirect, isJunta } from '@/lib/access';
+import { canWriteBlog, canPublishDirect, isJunta, associateSeatActive } from '@/lib/access';
 import { notifyBlogSubscribers } from '@/lib/notifyBlog';
 import { slugify } from '@/lib/commission';
 import { saveUploadedImage } from '@/lib/upload';
@@ -25,10 +25,11 @@ function statusLabel(status: string) {
 
 export default async function PanelBlogPage() {
   const session = await auth();
-  if (!session?.user || !canWriteBlog((session.user as { role?: string }).role)) {
+  if (!session?.user) redirect('/login');
+  const role = (session.user as { role?: string }).role;
+  if (!canWriteBlog(role) || !(isJunta(role) || (await associateSeatActive(session.user.id, role)))) {
     redirect('/panel');
   }
-  const role = (session.user as { role?: string }).role;
   const posts = await prisma.blogPost.findMany({
     where: isJunta(role) ? {} : { authorId: session.user.id },
     orderBy: { updatedAt: 'desc' },

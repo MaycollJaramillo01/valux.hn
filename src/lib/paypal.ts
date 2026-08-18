@@ -25,7 +25,7 @@ async function paypalToken() {
   return data.access_token;
 }
 
-export async function createPaypalOrder(amount: number, description: string) {
+export async function createPaypalOrder(amount: number, description: string, customId?: string) {
   const token = await paypalToken();
   const res = await fetch(`${paypalBase()}/v2/checkout/orders`, {
     method: 'POST',
@@ -38,6 +38,7 @@ export async function createPaypalOrder(amount: number, description: string) {
       purchase_units: [
         {
           description,
+          custom_id: customId,
           amount: { currency_code: 'USD', value: amount.toFixed(2) },
         },
       ],
@@ -57,6 +58,43 @@ export async function capturePaypalOrder(orderId: string) {
     },
   });
   if (!res.ok) throw new Error(await res.text());
-  const data = (await res.json()) as { status?: string; id?: string };
+  const data = (await res.json()) as {
+    status?: string;
+    id?: string;
+    payer?: {
+      email_address?: string;
+      name?: { given_name?: string; surname?: string };
+    };
+    purchase_units?: { custom_id?: string; amount?: { value?: string } }[];
+  };
   return data;
+}
+
+export function parseAssociateMonths(months: unknown) {
+  const cycle = Number(months);
+  if (cycle !== 3 && cycle !== 6 && cycle !== 12) return null;
+  return cycle as 3 | 6 | 12;
+}
+
+export function parseAssociateCustomId(customId?: string | null) {
+  if (!customId) return null;
+  const match = customId.match(/^assoc:([^:]+):(3|6|12)$/);
+  if (!match) return null;
+  return { userId: match[1], months: Number(match[2]) as 3 | 6 | 12 };
+}
+
+export function parseDonationPledge(amount: unknown, months: unknown) {
+  const monthlyCents = Math.round(Number(amount) * 100);
+  const cycle = Number(months);
+  if (!Number.isFinite(monthlyCents) || monthlyCents < 100 || monthlyCents > 500_000) {
+    return null;
+  }
+  if (cycle !== 3 && cycle !== 6 && cycle !== 12) {
+    return null;
+  }
+  return {
+    monthlyAmount: monthlyCents / 100,
+    months: cycle,
+    total: (monthlyCents * cycle) / 100,
+  };
 }

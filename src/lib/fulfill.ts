@@ -10,6 +10,7 @@ export async function recordPaidSale(opts: {
   courseId?: string | null;
   productId?: string | null;
   amountPaid: number;
+  months?: number;
   paypalOrderId?: string | null;
 }) {
   const settings = await getSettings();
@@ -67,8 +68,25 @@ export async function recordPaidSale(opts: {
   }
 
   if (opts.kind === 'SUBSCRIPTION') {
-    const periodEnd = new Date(paidAt);
-    periodEnd.setMonth(periodEnd.getMonth() + 1);
+    const months = opts.months && opts.months > 0 ? opts.months : 1;
+    const user = await prisma.user.findUnique({
+      where: { id: opts.buyerId },
+      select: { role: true },
+    });
+    if (user && (user.role === 'USER' || user.role === 'MEMBER')) {
+      await prisma.user.update({
+        where: { id: opts.buyerId },
+        data: { role: 'ASSOCIATE' },
+      });
+    }
+    const latest = await prisma.platformSubscription.findFirst({
+      where: { userId: opts.buyerId, status: 'ACTIVE' },
+      orderBy: { currentPeriodEnd: 'desc' },
+    });
+    const base =
+      latest && latest.currentPeriodEnd > paidAt ? latest.currentPeriodEnd : paidAt;
+    const periodEnd = new Date(base);
+    periodEnd.setMonth(periodEnd.getMonth() + months);
     await prisma.platformSubscription.create({
       data: {
         userId: opts.buyerId,

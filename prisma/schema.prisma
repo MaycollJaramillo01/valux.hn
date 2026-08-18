@@ -53,6 +53,18 @@ enum PayoutStatus {
   TRANSFERRED
 }
 
+enum DonationStatus {
+  PENDING
+  PAID
+}
+
+enum ApplicationStatus {
+  NEW
+  REVIEWING
+  ACCEPTED
+  REJECTED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String
@@ -286,6 +298,57 @@ model Sale {
   seller  User?    @relation("SaleSeller", fields: [sellerId], references: [id], onDelete: SetNull)
   course  Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model MembershipApplication {
+  id               String            @id @default(cuid())
+  email            String
+  fullName         String
+  photoUrl         String
+  birthDate        String
+  birthPlace       String
+  nationality      String
+  identityNumber   String
+  gender           String
+  maritalStatus    String
+  address          String
+  phone            String
+  bloodType        String
+  heightWeight     String?
+  altContact       String
+  favoriteColors   String
+  favoriteFood     String
+  favoriteDessert  String
+  hobby            String
+  occupation       String
+  workplace        String
+  educationLevel   String
+  profession       String
+  orgValue         String
+  skills           String
+  socialMedia      String
+  medicalCondition String
+  allergies        String
+  signature        String
+  declarationDate  String
+  status           ApplicationStatus @default(NEW)
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Donation {
+  id             String         @id @default(cuid())
+  monthlyAmount  Float
+  months         Int
+  total          Float
+  currency       String         @default("USD")
+  status         DonationStatus @default(PENDING)
+  paypalOrderId  String         @unique
+  payerEmail     String?
+  payerName      String?
+  paidAt         DateTime?
+  createdAt      DateTime       @default(now())
 }
 
 model MonthlyPayout {

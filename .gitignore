@@ -20,3 +20,4 @@ public/Assets/Videos/*.mp4
 public/uploads/**
 !public/uploads/.gitkeep
 !public/uploads/blog/.gitkeep
+!public/uploads/aplicaciones/.gitkeep

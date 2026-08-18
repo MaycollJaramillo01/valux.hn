@@ -10,14 +10,13 @@ const staticPages = [
   'podcast',
   'aliados',
   'contacto',
-  'apoya',
 ];
 
 const nextConfig = {
   outputFileTracingRoot: import.meta.dirname,
   experimental: {
     serverActions: {
-      bodySizeLimit: '8mb',
+      bodySizeLimit: '12mb',
     },
   },
   async rewrites() {
@@ -39,6 +38,7 @@ const nextConfig = {
         destination: `/${page}`,
         permanent: true,
       })),
+      { source: '/apoya.html', destination: '/apoya', permanent: true },
     ];
   },
   async headers() {

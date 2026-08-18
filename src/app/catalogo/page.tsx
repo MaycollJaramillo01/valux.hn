@@ -40,11 +40,11 @@ export default async function CatalogoPage() {
               <span className="eyebrow">Academia</span>
               <h2>Cursos y recursos</h2>
               <p className="lead">
-                Un solo espacio: formación y marketplace. Comprá ítems sueltos o desbloqueá todo con suscripción.
+                Un solo espacio: formación y marketplace. Comprá ítems sueltos o asociate y desbloqueá todo.
               </p>
               {!fullAccess && (
                 <p style={{ marginTop: '1.25rem' }}>
-                  <a href="/suscripcion" className="btn btn-primary">Desbloquear todo con suscripción</a>
+                  <a href="/suscripcion" className="btn btn-primary">Conviértete en asociado</a>
                 </p>
               )}
             </div>

@@ -89,6 +89,42 @@ export async function sendVerificationEmail(to: string, name: string, token: str
   );
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+export async function sendApplicationNoticeEmail(
+  to: string,
+  application: { fullName: string; email: string; rows: { label: string; value: string }[] }
+) {
+  const panelUrl = `${appBaseUrl()}/panel/junta/aplicaciones`;
+  const rows = application.rows
+    .map(
+      (row) =>
+        `<p style="margin:0 0 12px;"><strong>${escapeHtml(row.label)}</strong><br>${escapeHtml(row.value).replace(/\n/g, '<br>')}</p>`
+    )
+    .join('');
+  await sendResend(
+    to,
+    `Nueva ficha de ingreso: ${application.fullName}`,
+    valuxEmailShell(
+      `
+      <h1 style="font-size:26px;margin:8px 0 16px;">Nueva ficha de ingreso</h1>
+      <p>${escapeHtml(application.fullName)} (${escapeHtml(application.email)}) acaba de aplicar a VALUX.</p>
+      ${rows}
+      <p style="margin:28px 0;">
+        <a href="${panelUrl}" style="background:#1e50a0;color:#fff;padding:12px 22px;text-decoration:none;font-family:Consolas,monospace;font-size:13px;letter-spacing:1px;">VER EN EL PANEL</a>
+      </p>
+    `,
+      'VALUX / Honduras · ficha de ingreso'
+    )
+  );
+}
+
 export async function sendBlogUpdateEmail(to: string, post: { title: string; excerpt: string; slug: string }) {
   const url = `${appBaseUrl()}/blog/${post.slug}`;
   await sendResend(

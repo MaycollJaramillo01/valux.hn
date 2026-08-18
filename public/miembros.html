@@ -86,7 +86,7 @@
 <meta name="theme-color" content="#1E50A0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v=ficha2">
 </head>
 <body>
 
@@ -98,7 +98,7 @@
         </a>
         <nav class="nav-main" aria-label="Navegación principal">
             <ul class="nav-list">
-                <li><a href="/" class="active" data-es="Inicio" data-en="Home">Inicio</a></li>
+                <li><a href="/" data-es="Inicio" data-en="Home">Inicio</a></li>
                 
                 <li class="has-dropdown">
                     <a href="#" data-es="Nosotros" data-en="About Us">Nosotros</a>
@@ -120,7 +120,7 @@
                     </ul>
                 </li>
 
-                <li><a href="miembros" data-es="Comunidad" data-en="Community">Comunidad</a></li>
+                <li><a href="miembros" class="active" data-es="Comunidad" data-en="Community">Comunidad</a></li>
             </ul>
             <div class="nav-cta">
                 <div class="lang-toggle" role="group" aria-label="Cambiar idioma">
@@ -262,14 +262,201 @@
 <section id="aplicar">
     <div class="container container-narrow">
         <div class="section-head center reveal">
-            <span class="eyebrow" data-es="Aplicación" data-en="Application">Aplicación</span>
-            <h2 data-es="Formulario oficial" data-en="Official form">Formulario oficial</h2>
-            <p class="lead" data-es="Completá el formulario. Revisamos cada aplicación con cuidado y te respondemos pronto." data-en="Fill the form. We review each application carefully and reply promptly.">Completá el formulario. Revisamos cada aplicación con cuidado y te respondemos pronto.</p>
+            <span class="eyebrow">VALUX 2026</span>
+            <h2>Ficha de ingreso</h2>
+            <p class="lead">Toda persona con interés de ser miembro de la asociación VALUX debe llenar esta ficha de ingreso.</p>
         </div>
-        <div class="video-wrap reveal" style="background:var(--off-white);">
-            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdummy-formulario-valux/viewform?embedded=true" width="100%" height="800" frameborder="0" marginheight="0" marginwidth="0" title="Formulario VALUX" style="background:#fff;">Cargando…</iframe>
-        </div>
-        <p class="text-center" style="margin-top:1rem;font-size:.9rem;color:var(--grey-500);" data-es="¿No te carga el formulario? Escribinos a aplicaciones@valux.hn" data-en="Form not loading? Email us at aplicaciones@valux.hn">¿No te carga el formulario? Escribinos a <a href="mailto:aplicaciones@valux.hn">aplicaciones@valux.hn</a></p>
+        <form id="apply-form" class="apply-form reveal" novalidate>
+            <input class="apply-hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+            <p class="apply-section">Datos personales</p>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-email">Correo electrónico *</label>
+                    <input id="apply-email" name="email" type="email" required autocomplete="email">
+                </div>
+                <div class="field">
+                    <label for="apply-name">Nombre completo *</label>
+                    <input id="apply-name" name="fullName" type="text" required autocomplete="name">
+                </div>
+            </div>
+            <div class="field">
+                <label for="apply-photo">Agregá foto *</label>
+                <input id="apply-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required>
+                <span class="field-hint">1 archivo. JPG, PNG, WebP o GIF. Máximo 10 MB.</span>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-birth">Fecha de nacimiento *</label>
+                    <input id="apply-birth" name="birthDate" type="date" required>
+                </div>
+                <div class="field">
+                    <label for="apply-birthplace">Lugar de nacimiento *</label>
+                    <input id="apply-birthplace" name="birthPlace" type="text" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-nationality">Nacionalidad *</label>
+                    <input id="apply-nationality" name="nationality" type="text" required>
+                </div>
+                <div class="field">
+                    <label for="apply-id">Número de identidad *</label>
+                    <input id="apply-id" name="identityNumber" type="text" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-gender">Género *</label>
+                    <select id="apply-gender" name="gender" required>
+                        <option value="">Elegí una opción</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Prefiero no decir">Prefiero no decir</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="apply-civil">Estado civil *</label>
+                    <select id="apply-civil" name="maritalStatus" required>
+                        <option value="">Elegí una opción</option>
+                        <option value="Soltero/a">Soltero/a</option>
+                        <option value="Casado/a">Casado/a</option>
+                        <option value="Unión libre">Unión libre</option>
+                        <option value="Divorciado/a">Divorciado/a</option>
+                        <option value="Viudo/a">Viudo/a</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label for="apply-address">Dirección de residencia *</label>
+                <textarea id="apply-address" name="address" rows="3" required placeholder="País, ciudad, colonia, calle, avenida, número de casa y referencias"></textarea>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-phone">Teléfono de contacto *</label>
+                    <input id="apply-phone" name="phone" type="tel" required autocomplete="tel">
+                </div>
+                <div class="field">
+                    <label for="apply-blood">Tipo de sangre *</label>
+                    <select id="apply-blood" name="bloodType" required>
+                        <option value="">Elegí una opción</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="No lo sé">No lo sé</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label for="apply-body">Peso y estatura</label>
+                <input id="apply-body" name="heightWeight" type="text" placeholder="Ej. 70 kg / 1.72 m">
+            </div>
+
+            <p class="apply-section">Contacto alternativo</p>
+            <div class="field">
+                <label for="apply-alt">Nombre, relación y teléfono *</label>
+                <input id="apply-alt" name="altContact" type="text" required placeholder="Ej. María López, hermana, +504 9999-0000">
+            </div>
+
+            <p class="apply-section">Preferencias personales</p>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-colors">Colores favoritos *</label>
+                    <input id="apply-colors" name="favoriteColors" type="text" required>
+                </div>
+                <div class="field">
+                    <label for="apply-food">Comida favorita *</label>
+                    <input id="apply-food" name="favoriteFood" type="text" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-dessert">Postre favorito *</label>
+                    <input id="apply-dessert" name="favoriteDessert" type="text" required>
+                </div>
+                <div class="field">
+                    <label for="apply-hobby">Hobby o pasatiempo favorito *</label>
+                    <input id="apply-hobby" name="hobby" type="text" required>
+                </div>
+            </div>
+
+            <p class="apply-section">Datos laborales</p>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-job">Ocupación actual *</label>
+                    <input id="apply-job" name="occupation" type="text" required>
+                </div>
+                <div class="field">
+                    <label for="apply-work">Lugar de trabajo *</label>
+                    <input id="apply-work" name="workplace" type="text" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-edu">Nivel de educación *</label>
+                    <input id="apply-edu" name="educationLevel" type="text" required>
+                </div>
+                <div class="field">
+                    <label for="apply-pro">Profesión *</label>
+                    <input id="apply-pro" name="profession" type="text" required>
+                </div>
+            </div>
+
+            <p class="apply-section">Aporte a la organización</p>
+            <div class="field">
+                <label for="apply-value">¿Cómo cree que puede aportar valor a la organización? *</label>
+                <textarea id="apply-value" name="orgValue" rows="4" required></textarea>
+            </div>
+            <div class="field">
+                <label for="apply-skills">¿Qué habilidades o experiencias considera que son valiosas para la organización? *</label>
+                <textarea id="apply-skills" name="skills" rows="4" required></textarea>
+            </div>
+            <div class="field">
+                <label for="apply-social">¿Cuál es su presencia actual en social media? Coloque nombre y plataforma/s *</label>
+                <textarea id="apply-social" name="socialMedia" rows="3" required placeholder="Ej. @valux en Instagram y TikTok"></textarea>
+            </div>
+
+            <p class="apply-section">Información adicional</p>
+            <div class="field">
+                <label for="apply-medical">¿Tiene alguna discapacidad o condición médica relevante? *</label>
+                <textarea id="apply-medical" name="medicalCondition" rows="3" required></textarea>
+            </div>
+            <div class="field">
+                <label for="apply-allergy">¿Tiene alguna alergia o restricción alimentaria? *</label>
+                <textarea id="apply-allergy" name="allergies" rows="3" required></textarea>
+            </div>
+
+            <p class="apply-section">Declaración</p>
+            <p class="apply-legal">Declaro que la información proporcionada es veraz y completa. Acepto que la comunidad utilice mis datos para los fines pertinentes.</p>
+            <p class="apply-legal">La información proporcionada en esta ficha será utilizada exclusivamente para fines que no afecten la moral o dignidad de la persona, respetando la confidencialidad y protegiendo su integridad. Los datos serán manejados de acuerdo a las políticas de privacidad y ética de la organización.</p>
+            <div class="form-row">
+                <div class="field">
+                    <label for="apply-sign">Firma *</label>
+                    <input id="apply-sign" name="signature" type="text" required placeholder="Escribí tu nombre completo">
+                </div>
+                <div class="field">
+                    <label for="apply-date">Fecha *</label>
+                    <input id="apply-date" name="declarationDate" type="date" required>
+                </div>
+            </div>
+            <div class="field-check">
+                <input id="apply-consent" name="consent" type="checkbox" required>
+                <label for="apply-consent">Acepto la declaración y el manejo confidencial de esta ficha.</label>
+            </div>
+            <div class="apply-actions">
+                <button type="submit" class="btn btn-primary">
+                    <span>Enviar ficha</span>
+                    <span class="arrow">→</span>
+                </button>
+                <span class="form-status" role="status"></span>
+            </div>
+        </form>
+        <p class="text-center apply-note">La junta revisa cada ficha. Te respondemos pronto.</p>
     </div>
 </section>
 
@@ -331,7 +518,7 @@
     <a href="https://wa.me/50400000000" target="_blank" rel="noopener" class="float-btn float-whatsapp"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4 0 1.4 1 2.8 1.2 3 .1.2 2 3.1 4.9 4.4.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.2-.6-.4zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.2-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg><span>WhatsApp</span></a>
 </div>
 
-<script src="js/main.js"></script>
+<script src="js/main.js?v=ficha2"></script>
 <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
 </body>
 </html>

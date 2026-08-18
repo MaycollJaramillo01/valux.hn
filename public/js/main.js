@@ -264,6 +264,59 @@
         });
     });
 
+    // ---------- Membership application ----------
+    const applyForm = document.querySelector('#apply-form');
+    if (applyForm instanceof HTMLFormElement) {
+        const dateInput = applyForm.querySelector('#apply-date');
+        if (dateInput instanceof HTMLInputElement && !dateInput.value) {
+            dateInput.value = new Date().toISOString().slice(0, 10);
+        }
+        applyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const status = applyForm.querySelector('.form-status');
+            const submit = applyForm.querySelector('button[type="submit"]');
+            const photo = applyForm.querySelector('#apply-photo');
+            if (photo instanceof HTMLInputElement && photo.files?.[0] && photo.files[0].size > 10 * 1024 * 1024) {
+                if (status) {
+                    status.textContent = 'La foto no puede pesar más de 10 MB.';
+                    status.style.color = 'var(--royal)';
+                }
+                return;
+            }
+            const payload = new FormData(applyForm);
+            payload.set('consent', applyForm.querySelector('#apply-consent')?.checked === true ? 'true' : 'false');
+            if (submit) submit.disabled = true;
+            if (status) {
+                status.textContent = 'Enviando…';
+                status.style.color = 'var(--ink)';
+            }
+            try {
+                const res = await fetch('/api/aplicaciones', {
+                    method: 'POST',
+                    body: payload,
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok) {
+                    applyForm.reset();
+                    if (status) {
+                        status.textContent = 'Listo. La junta ya tiene tu ficha.';
+                        status.style.color = 'var(--royal)';
+                    }
+                } else if (status) {
+                    status.textContent = data.error || 'No se pudo enviar. Revisá los campos.';
+                    status.style.color = 'var(--royal)';
+                }
+            } catch {
+                if (status) {
+                    status.textContent = 'No se pudo enviar. Intentá de nuevo.';
+                    status.style.color = 'var(--royal)';
+                }
+            } finally {
+                if (submit) submit.disabled = false;
+            }
+        });
+    }
+
     // ---------- Contact form (stub) ----------
     const contactForm = document.querySelector('#contact-form');
     if (contactForm) {
