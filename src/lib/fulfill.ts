@@ -68,7 +68,7 @@ export async function recordPaidSale(opts: {
   }
 
   if (opts.kind === 'SUBSCRIPTION') {
-    const months = opts.months && opts.months > 0 ? opts.months : 1;
+    const months = opts.months && opts.months > 0 ? opts.months : 12;
     const user = await prisma.user.findUnique({
       where: { id: opts.buyerId },
       select: { role: true },

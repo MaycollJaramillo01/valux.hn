@@ -96,8 +96,8 @@ export default function DonationPanel({
         </label>
       )}
 
-      <p className="panel-kicker" style={{ marginTop: '1.1rem' }} data-es="Compromiso" data-en="Commitment">
-        Compromiso
+      <p className="panel-kicker" style={{ marginTop: '1.1rem' }} data-es="Compromiso (3, 6 o 12 meses)" data-en="Commitment (3, 6 or 12 months)">
+        Compromiso (3, 6 o 12 meses)
       </p>
       <div className="commitment-grid" role="radiogroup" aria-label="Duración del compromiso">
         {TERMS.map((term) => (

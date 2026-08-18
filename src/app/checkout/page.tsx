@@ -37,7 +37,7 @@ export default async function CheckoutPage({
               <p className="eyebrow">Asociación VALUX</p>
               <h1 style={{ textTransform: 'none' }}>Conviértete en asociado</h1>
               <p className="lead">
-                Desbloqueás todo el catálogo y podés publicar en el blog y el marketplace (la junta revisa). ${settings.subscriptionPrice.toFixed(2)} USD al mes, con compromiso de 3, 6 o 12 meses.
+                Desbloqueás todo el catálogo y podés publicar en el blog y el marketplace (la junta revisa). ${settings.subscriptionPrice.toFixed(2)} USD al mes, con compromiso de un año. PayPal cobra ahora el total.
               </p>
               {paypalConfigured() && clientId ? (
                 <AssociateCheckout monthly={settings.subscriptionPrice} clientId={clientId} />

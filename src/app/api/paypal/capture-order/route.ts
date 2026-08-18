@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import {
+  ASSOCIATE_TERM_MONTHS,
   amountsMatch,
   capturePaypalOrder,
   paypalCapturedAmount,
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
       kind: 'SUBSCRIPTION',
       buyerId,
       amountPaid: intent.amount,
-      months: intent.months ?? 3,
+      months: intent.months ?? ASSOCIATE_TERM_MONTHS,
       paypalOrderId: body.orderId,
     });
     return NextResponse.json({ ok: true, href: '/panel' });

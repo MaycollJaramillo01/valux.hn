@@ -92,11 +92,8 @@ export function amountsMatch(expected: number, paid: number | null) {
   return Math.abs(expected - paid) < 0.02;
 }
 
-export function parseAssociateMonths(months: unknown) {
-  const cycle = Number(months);
-  if (cycle !== 3 && cycle !== 6 && cycle !== 12) return null;
-  return cycle as 3 | 6 | 12;
-}
+/** Asociación: un año fijo. 3/6/12 aplica solo a donaciones. */
+export const ASSOCIATE_TERM_MONTHS = 12 as const;
 
 export function parseAssociateCustomId(customId?: string | null) {
   if (!customId) return null;
